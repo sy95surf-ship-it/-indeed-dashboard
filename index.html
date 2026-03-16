@@ -40,7 +40,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Kaku Goth
 .ml{max-height:400px;overflow-y:auto}
 .mr{display:flex;align-items:center;padding:12px 24px;border-bottom:1px solid var(--b);gap:16px}.mr:hover{background:#f9fafb}
 .mr .mn{flex:1;font-weight:600;font-size:.9rem}.mr .ms{display:flex;gap:16px;font-size:.8rem;color:var(--t2)}.mr .ms span{white-space:nowrap}
-.mr .md{background:none;border:1px solid var(--d);color:var(--d);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:600}.mr .md:hover{background:var(--d);color:#fff}
 .kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
 .kc{background:var(--c);border-radius:var(--r);padding:18px;box-shadow:var(--sh);text-align:center;transition:transform .2s}
 .kc:hover{transform:translateY(-2px)}.kl{font-size:.72rem;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.5px}
@@ -84,14 +83,28 @@ th:hover{background:#1a3f7a}td{padding:10px 16px;border-bottom:1px solid var(--b
 .ld{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:9998;display:none;align-items:center;justify-content:center}
 .ld.on{display:flex}.ld-b{background:var(--c);border-radius:var(--r);padding:32px;text-align:center}.ld-s{width:40px;height:40px;border:4px solid var(--b);border-top-color:var(--p);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 16px}
 @keyframes sp{to{transform:rotate(360deg)}}
+.rk{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:.5px}
+.rk-S{background:linear-gradient(135deg,#ffd700,#ffb300);color:#7a5900}
+.rk-A{background:#d4edda;color:#155724}
+.rk-B{background:#e8f0fe;color:#2557a7}
+.rk-C{background:#fff3cd;color:#856404}
+.rk-D{background:#f8d7da;color:#721c24}
+.pc{background:var(--c);border-radius:var(--r);padding:24px;box-shadow:var(--sh);margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.pc-r{font-size:2.5rem;font-weight:900;width:60px;text-align:center}
+.pc-r.S{color:#d4a000}.pc-r.A{color:#28a745}.pc-r.B{color:#2557a7}.pc-r.C{color:#d39e00}.pc-r.D{color:#dc3545}
+.pc-i{flex:1;min-width:200px}.pc-t{font-weight:700;font-size:1rem;margin-bottom:4px}.pc-t a{color:var(--p);text-decoration:underline}
+.pc-d{font-size:.82rem;color:var(--t2)}.pc-m{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.pc-m span{font-size:.82rem;background:var(--bg);padding:4px 10px;border-radius:6px}
+.pf-g{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.pf-b{padding:10px 20px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;border:2px solid var(--b);background:var(--c);transition:all .2s}
+.pf-b:hover{border-color:var(--p)}.pf-b.on{border-color:var(--p);background:var(--pl)}
+.pf-c{font-size:1.2rem;margin-left:4px}
 @media(max-width:1024px){.cg{grid-template-columns:1fr}}
 @media(max-width:768px){.cn{padding:12px}.kg{grid-template-columns:repeat(2,1fr)}.fl{flex-direction:column}.fg{min-width:100%}.hd{padding:16px;flex-direction:column;align-items:flex-start}.hd h1{font-size:1.1rem}}
 </style>
 </head>
 <body>
-
 <div class="ld" id="LD"><div class="ld-b"><div class="ld-s"></div><div id="LT">データを読み込み中...</div></div></div>
-
 <div class="hd">
 <h1>Indeed スポンサー求人ダッシュボード</h1>
 <div class="hd-a">
@@ -104,7 +117,6 @@ th:hover{background:#1a3f7a}td{padding:10px 16px;border-bottom:1px solid var(--b
 </div>
 <div class="tc" id="TC"></div>
 <div class="do" id="DO"><div class="db"><h3 id="DT"></h3><p id="DM"></p><div class="da"><button class="bc" id="DC">キャンセル</button><button class="bd" id="DK">削除</button></div></div></div>
-
 <div class="cn">
 <div class="ua" id="UA">
 <h2>CSVファイルをドラッグ＆ドロップ</h2>
@@ -112,7 +124,6 @@ th:hover{background:#1a3f7a}td{padding:10px 16px;border-bottom:1px solid var(--b
 <p style="margin-top:8px;font-size:.8rem;color:var(--t2)">1社ずつ追加OK ／ 複数ファイル同時対応 ／ 同じ参照番号は自動上書き</p>
 <label class="ub" for="f2">ファイルを選択</label><input type="file" id="f2" accept=".csv" multiple style="display:none">
 </div>
-
 <div class="ds" id="DS">
 <div class="di">
 <div><div class="l">企業数</div><div class="v" id="s1">0</div></div>
@@ -121,9 +132,7 @@ th:hover{background:#1a3f7a}td{padding:10px 16px;border-bottom:1px solid var(--b
 </div>
 <div class="ss"><div class="sd" id="SD"></div><span id="ST">接続中...</span></div>
 </div>
-
 <div class="mg" id="MG"><div class="mg-h"><h3>登録企業一覧</h3></div><div class="ml" id="ML"></div></div>
-
 <div id="DB" style="display:none">
 <div class="fl">
 <div class="fg"><label>企業名</label><select id="FC"><option value="">すべて</option></select></div>
@@ -133,7 +142,8 @@ th:hover{background:#1a3f7a}td{padding:10px 16px;border-bottom:1px solid var(--b
 <button class="fr" id="FR">リセット</button>
 </div>
 <div class="tb">
-<button class="tt on" data-t="overview">概要</button>
+<button class="tt on" data-t="performance">パフォーマンス</button>
+<button class="tt" data-t="overview">概要</button>
 <button class="tt" data-t="ranking">ランキング</button>
 <button class="tt" data-t="funnel">ファネル</button>
 <button class="tt" data-t="cost">コスト</button>
@@ -142,7 +152,13 @@ th:hover{background:#1a3f7a}td{padding:10px 16px;border-bottom:1px solid var(--b
 <button class="tt" data-t="table">テーブル</button>
 </div>
 
-<div class="tp on" id="p-overview">
+<div class="tp on" id="p-performance">
+<div class="kg" id="PK"></div>
+<div class="pf-g" id="PF"></div>
+<div id="PL"></div>
+</div>
+
+<div class="tp" id="p-overview">
 <div class="kg" id="KG"></div>
 <div class="cg">
 <div class="cd"><h3>表示回数TOP15</h3><div class="cc tl"><canvas id="c1"></canvas></div></div>
@@ -222,8 +238,7 @@ th:hover{background:#1a3f7a}td{padding:10px 16px;border-bottom:1px solid var(--b
    ============================================ */
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbx39AKmJea_cG1s6FWYMSMYC2RTA_JnRIiUUZSlsNtuUtTF6yJbR35WB72PCLowozgI/exec';
 
-/* グローバル変数 */
-var raw=[],flt=[],ch={},srt={c:null,a:true},pg=1;
+var raw=[],flt=[],ch={},srt={c:null,a:true},pg=1,pfRank='ALL';
 var PG=25;
 var KS=['title','campaign','country','prefecture','city','company','refId','createdAt','updatedAt','source','impressions','ctr','clicks','asr','appStarts','completionRate','applications','ar','cost','cpc','cpas','cpa','url','category','status'];
 var JH=['求人','キャンペーン','国','都道府県','市区町村','企業名','参照番号','作成日','最終更新日','掲載元サイト','表示回数','クリック率（CTR）','クリック数','応募開始率 (ASR)','応募開始数','応募完了率','応募数','応募率 (AR)','費用','クリック単価（CPC）','応募開始単価（CPAS）','応募単価（CPA）','求人URL','カテゴリー','求人のステータス'];
@@ -232,8 +247,8 @@ CM['クリック率(CTR)']='ctr';CM['応募開始率(ASR)']='asr';CM['応募率(
 var NK=['impressions','clicks','appStarts','applications','cost','ctr','asr','completionRate','ar','cpc','cpas','cpa'];
 var PCT=['ctr','asr','ar','completionRate'];
 var CL=['#2557a7','#ff6b35','#28a745','#dc3545','#ffc107','#6f42c1','#17a2b8','#fd7e14','#20c997','#e83e8c','#6c757d','#007bff','#00bcd4','#8bc34a','#9c27b0'];
+var RKC={S:'#d4a000',A:'#28a745',B:'#2557a7',C:'#d39e00',D:'#dc3545'};
 
-/* ユーティリティ */
 function toast(t,m,e){var c=document.getElementById('TC'),el=document.createElement('div');el.className='to'+(e?' er':'');el.innerHTML='<b>'+t+'</b><span>'+m+'</span>';c.appendChild(el);setTimeout(function(){el.remove()},4500)}
 function showLoad(m){document.getElementById('LT').textContent=m||'読み込み中...';document.getElementById('LD').classList.add('on')}
 function hideLoad(){document.getElementById('LD').classList.remove('on')}
@@ -249,6 +264,45 @@ function fV(k,v){if(PCT.indexOf(k)!==-1)return fP(v);if('cost cpc cpas cpa'.inde
 function dx(k){if(ch[k]){ch[k].destroy();delete ch[k]}}
 function sm(a,k){var s=0;for(var i=0;i<a.length;i++)s+=(a[i][k]||0);return s}
 function av(a,k){return a.length?sm(a,k)/a.length:0}
+function rkBadge(r){return'<span class="rk rk-'+r+'">'+r+'</span>'}
+
+/* パフォーマンスランク計算 */
+function calcRanks(data){
+  if(!data.length)return;
+  var scored=data.filter(function(d){return d.impressions>0});
+  if(!scored.length)return;
+  function percentile(arr,k){
+    var vals=arr.map(function(d){return d[k]}).sort(function(a,b){return a-b});
+    arr.forEach(function(d){
+      var idx=vals.indexOf(d[k]);
+      d['_p_'+k]=vals.length>1?idx/(vals.length-1):0.5;
+    });
+  }
+  percentile(scored,'ctr');
+  percentile(scored,'ar');
+  /* CPA: 低い方が良いので反転。CPA=0（応募なし）は最低スコア */
+  var withCpa=scored.filter(function(d){return d.cpa>0});
+  var noCpa=scored.filter(function(d){return d.cpa<=0});
+  if(withCpa.length){
+    var cpaVals=withCpa.map(function(d){return d.cpa}).sort(function(a,b){return a-b});
+    withCpa.forEach(function(d){
+      var idx=cpaVals.indexOf(d.cpa);
+      d._p_cpa=cpaVals.length>1?1-(idx/(cpaVals.length-1)):0.5;
+    });
+  }
+  noCpa.forEach(function(d){d._p_cpa=0});
+  scored.forEach(function(d){
+    var score=(d._p_ctr+d._p_ar+d._p_cpa)/3;
+    d._score=Math.round(score*100);
+    if(score>=0.8)d._rank='S';
+    else if(score>=0.6)d._rank='A';
+    else if(score>=0.4)d._rank='B';
+    else if(score>=0.2)d._rank='C';
+    else d._rank='D';
+  });
+  var noImp=data.filter(function(d){return d.impressions<=0});
+  noImp.forEach(function(d){d._score=0;d._rank='D';d._p_ctr=0;d._p_ar=0;d._p_cpa=0});
+}
 
 /* CSV解析 */
 function parseCSV(text){
@@ -273,7 +327,6 @@ function parseCSV(text){
 
 /* GAS通信 */
 function setStatus(cls,txt){document.getElementById('SD').className='sd '+cls;document.getElementById('ST').textContent=txt}
-
 function fetchGAS(){
   return new Promise(function(resolve){
     if(!GAS_URL||GAS_URL.indexOf('https://')!==0){setStatus('er','未設定');resolve(false);return}
@@ -287,35 +340,18 @@ function fetchGAS(){
       for(var i=1;i<data.length;i++){
         var row=data[i],o={};
         for(var j=0;j<hd.length;j++){var k=CM[String(hd[j]).trim()]||KS[j]||String(hd[j]).trim();o[k]=row[j]!=null?row[j]:'';}
-        for(var j=0;j<NK.length;j++){
-          var nk=NK[j],v=String(o[nk]||'').replace(/,/g,'');
-          var num=parseFloat(v)||0;
-          if(PCT.indexOf(nk)!==-1&&num>1)num=num/100;
-          o[nk]=num;
-        }
+        for(var j=0;j<NK.length;j++){var nk=NK[j],v=String(o[nk]||'').replace(/,/g,'');var num=parseFloat(v)||0;if(PCT.indexOf(nk)!==-1&&num>1)num=num/100;o[nk]=num;}
         if(o.refId)out.push(o);
       }
       raw=out;setStatus('ok','同期完了 '+raw.length+'件');resolve(true);
     }).catch(function(e){setStatus('er','接続エラー');resolve(false)});
   });
 }
-
 function sendGAS(rows){
   if(!GAS_URL||GAS_URL.indexOf('https://')!==0)return Promise.resolve(false);
   var data=[];
-  for(var i=0;i<rows.length;i++){
-    var r=rows[i],a=[];
-    for(var j=0;j<KS.length;j++)a.push(r[KS[j]]!=null?r[KS[j]]:'');
-    data.push(a);
-  }
-  return fetch(GAS_URL,{method:'POST',body:JSON.stringify({rows:data})}).then(function(r){return r.text()}).then(function(t){
-    try{var res=JSON.parse(t);return res.success!==false}catch(e){return true}
-  }).catch(function(e){toast('送信エラー',e.message,true);return false});
-}
-
-function deleteFromGAS(refIds){
-  /* スプレッドシートからの削除はGAS側で対応が必要なため、再同期で対応 */
-  return fetchGAS();
+  for(var i=0;i<rows.length;i++){var r=rows[i],a=[];for(var j=0;j<KS.length;j++)a.push(r[KS[j]]!=null?r[KS[j]]:'');data.push(a);}
+  return fetch(GAS_URL,{method:'POST',body:JSON.stringify({rows:data})}).then(function(r){return r.text()}).then(function(t){return true}).catch(function(e){toast('送信エラー',e.message,true);return false});
 }
 
 /* ファイル処理 */
@@ -324,58 +360,48 @@ function handleFiles(files){
   for(var i=0;i<files.length;i++){if(files[i].name.indexOf('.csv')!==-1)list.push(files[i])}
   if(!list.length){toast('エラー','CSVファイルを選んでください',true);return}
   showLoad('CSVを処理中...');
-  var done=0,totalAdd=0,totalUpd=0;
+  var done=0;
   list.forEach(function(f){
     var rd=new FileReader();
     rd.onload=function(e){
       var rows=parseCSV(e.target.result);
       if(!rows.length){toast(f.name,'解析失敗',true);done++;if(done===list.length)hideLoad();return}
-      sendGAS(rows).then(function(){
-        return fetchGAS();
-      }).then(function(){
-        done++;
-        toast(f.name,rows.length+'件を送信しました');
+      sendGAS(rows).then(function(){return fetchGAS()}).then(function(){
+        done++;toast(f.name,rows.length+'件を送信しました');
         if(done===list.length){hideLoad();init()}
       });
     };
     rd.readAsText(f,'UTF-8');
   });
 }
-
 document.getElementById('f1').onchange=function(e){handleFiles(e.target.files);e.target.value=''};
 document.getElementById('f2').onchange=function(e){handleFiles(e.target.files);e.target.value=''};
 document.body.ondragover=function(e){e.preventDefault();document.getElementById('UA').classList.add('dg')};
 document.body.ondragleave=function(){document.getElementById('UA').classList.remove('dg')};
 document.body.ondrop=function(e){e.preventDefault();document.getElementById('UA').classList.remove('dg');handleFiles(e.dataTransfer.files)};
-
 document.getElementById('syncB').onclick=function(){showLoad('スプレッドシートから取得中...');fetchGAS().then(function(){hideLoad();init();toast('同期完了',raw.length+'件のデータ')})};
-document.getElementById('clrB').onclick=function(){dlg('全削除','スプレッドシートのデータは残ります。ダッシュボードの表示をリセットしますか？').then(function(ok){if(ok){raw=[];init();toast('リセット','表示をクリアしました')}})};
+document.getElementById('clrB').onclick=function(){dlg('全削除','表示をリセットしますか？').then(function(ok){if(ok){raw=[];init();toast('リセット','表示をクリアしました')}})};
 document.getElementById('mgrB').onclick=function(){var el=document.getElementById('MG');el.classList.toggle('on');if(el.classList.contains('on'))renderMgr()};
 
 function renderMgr(){
   var g={};raw.forEach(function(d){if(!g[d.company])g[d.company]=[];g[d.company].push(d)});
   var el=document.getElementById('ML'),html='',entries=Object.keys(g).sort(function(a,b){return g[b].length-g[a].length});
-  entries.forEach(function(n){
-    var it=g[n],apps=0,cost=0;it.forEach(function(d){apps+=d.applications;cost+=d.cost});
-    html+='<div class="mr"><div class="mn">'+n+'</div><div class="ms"><span>求人:'+it.length+'</span><span>応募:'+apps+'</span><span>費用:¥'+Math.round(cost).toLocaleString()+'</span></div></div>';
-  });
+  entries.forEach(function(n){var it=g[n],apps=0,cost=0;it.forEach(function(d){apps+=d.applications;cost+=d.cost});html+='<div class="mr"><div class="mn">'+n+'</div><div class="ms"><span>求人:'+it.length+'</span><span>応募:'+apps+'</span><span>費用:¥'+Math.round(cost).toLocaleString()+'</span></div></div>'});
   el.innerHTML=html||'<div style="padding:24px;text-align:center;color:var(--t2)">データなし</div>';
 }
-
 document.getElementById('expB').onclick=function(){expCSV(raw,'indeed_all.csv')};
 document.getElementById('EF').onclick=function(){expCSV(flt,'indeed_filtered.csv')};
 function expCSV(data,name){
   if(!data.length){toast('エラー','データがありません',true);return}
   var rows=data.map(function(r){return KS.map(function(k){return r[k]!=null?r[k]:''})});
   var csv=[JH].concat(rows).map(function(r){return r.map(function(v){return'"'+String(v).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
-  var b=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();
+  var b=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();
 }
 
-/* 初期化 */
 function init(){
   if(!raw.length){document.getElementById('UA').style.display='';document.getElementById('DB').style.display='none';document.getElementById('DS').classList.remove('on');return}
   document.getElementById('UA').style.display='none';document.getElementById('DB').style.display='block';document.getElementById('DS').classList.add('on');
+  calcRanks(raw);
   var co={};raw.forEach(function(d){co[d.company]=1});
   document.getElementById('s1').textContent=Object.keys(co).length;
   document.getElementById('s2').textContent=raw.length;
@@ -398,7 +424,7 @@ function applyF(){
     if(co&&d.company!==co)return false;if(pr&&d.prefecture!==pr)return false;
     if(st&&d.status!==st)return false;if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;return true;
   });
-  pg=1;renderAll();
+  calcRanks(flt);pg=1;pfRank='ALL';renderAll();
 }
 
 document.querySelectorAll('.tt').forEach(function(t){t.onclick=function(){
@@ -408,8 +434,28 @@ document.querySelectorAll('.tt').forEach(function(t){t.onclick=function(){
   setTimeout(renderAll,50);
 }});
 
-/* ==== 描画 ==== */
-function renderAll(){rKPI();rOv();rRank();rFun();rCost();rComp();rReg();rTab()}
+function renderAll(){rPerf();rKPI();rOv();rRank();rFun();rCost();rComp();rReg();rTab()}
+
+/* パフォーマンスタブ */
+function rPerf(){
+  var cnt={S:0,A:0,B:0,C:0,D:0};
+  flt.forEach(function(d){if(d._rank)cnt[d._rank]++});
+  document.getElementById('PK').innerHTML=
+    '<div class="kc"><div class="kl">Sランク</div><div class="kv" style="color:'+RKC.S+'">'+cnt.S+'</div><div class="ks">コスパ最高</div></div>'+
+    '<div class="kc"><div class="kl">Aランク</div><div class="kv" style="color:'+RKC.A+'">'+cnt.A+'</div><div class="ks">良好</div></div>'+
+    '<div class="kc"><div class="kl">Bランク</div><div class="kv" style="color:'+RKC.B+'">'+cnt.B+'</div><div class="ks">平均的</div></div>'+
+    '<div class="kc"><div class="kl">Cランク</div><div class="kv" style="color:'+RKC.C+'">'+cnt.C+'</div><div class="ks">要改善</div></div>'+
+    '<div class="kc"><div class="kl">Dランク</div><div class="kv" style="color:'+RKC.D+'">'+cnt.D+'</div><div class="ks">要見直し</div></div>';
+  var ranks=['ALL','S','A','B','C','D'];
+  document.getElementById('PF').innerHTML=ranks.map(function(r){var label=r==='ALL'?'すべて':r;var count=r==='ALL'?flt.length:cnt[r]||0;return'<div class="pf-b'+(pfRank===r?' on':'')+'" data-r="'+r+'">'+label+'<span class="pf-c">'+count+'</span></div>'}).join('');
+  document.getElementById('PF').querySelectorAll('.pf-b').forEach(function(b){b.onclick=function(){pfRank=this.getAttribute('data-r');rPerf()}});
+  var show=pfRank==='ALL'?flt:flt.filter(function(d){return d._rank===pfRank});
+  show=show.slice().sort(function(a,b){return(b._score||0)-(a._score||0)});
+  document.getElementById('PL').innerHTML=show.map(function(d){
+    var titleHtml=d.url?'<a href="'+d.url+'" target="_blank">'+sT(d.title,50)+'</a>':sT(d.title,50);
+    return'<div class="pc"><div class="pc-r '+(d._rank||'D')+'">'+(d._rank||'D')+'</div><div class="pc-i"><div class="pc-t">'+titleHtml+'</div><div class="pc-d">'+(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="pc-m"><span>スコア: '+(d._score||0)+'/100</span><span>CTR: '+fP(d.ctr)+'</span><span>AR: '+fP(d.ar)+'</span><span>CPA: '+(d.cpa?fY(d.cpa):'-')+'</span><span>応募: '+fmt(d.applications)+'</span><span>費用: '+fY(d.cost)+'</span></div></div></div>'
+  }).join('')||'<div style="padding:24px;text-align:center;color:var(--t2)">該当なし</div>';
+}
 
 function rKPI(){
   var d=flt,tI=sm(d,'impressions'),tC=sm(d,'clicks'),tAS=sm(d,'appStarts'),tA=sm(d,'applications'),tCo=sm(d,'cost');
@@ -425,8 +471,7 @@ function rKPI(){
 }
 
 function hbar(id,key,data,lab,color){
-  dx(key);
-  ch[key]=new Chart(document.getElementById(id),{type:'bar',data:{labels:data.map(function(d){return sT(d.title)}),datasets:[{label:lab,data:data.map(function(d){return d._v}),backgroundColor:color}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{beginAtZero:true}}}});
+  dx(key);ch[key]=new Chart(document.getElementById(id),{type:'bar',data:{labels:data.map(function(d){return sT(d.title)}),datasets:[{label:lab,data:data.map(function(d){return d._v}),backgroundColor:color}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{beginAtZero:true}}}});
 }
 
 function rOv(){
@@ -450,7 +495,7 @@ function rRank(){
   var isPct=PCT.indexOf(k)!==-1;
   sl.forEach(function(d){d._v=isPct?d[k]*100:d[k]});
   dx('rank');ch.rank=new Chart(document.getElementById('c4'),{type:'bar',data:{labels:sl.map(function(d){return sT(d.title,30)}),datasets:[{data:sl.map(function(d){return d._v}),backgroundColor:sl.map(function(_,i){return CL[i%CL.length]})}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{beginAtZero:true}}}});
-  document.getElementById('RK').innerHTML=sl.map(function(d,i){var link=d.url?'<a href="'+d.url+'" target="_blank" style="color:var(--p);text-decoration:underline;cursor:pointer">'+sT(d.title,60)+'</a>':sT(d.title,60);return'<li class="ri"><div class="rn">'+(i+1)+'</div><div class="rf"><div class="rm">'+link+'</div><div class="rd">'+(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="rd">表示:'+fmt(d.impressions)+' クリック:'+fmt(d.clicks)+' 応募:'+fmt(d.applications)+' 費用:'+fY(d.cost)+'</div></div><div class="rv">'+fV(k,d[k])+'</div></li>'}).join('');
+  document.getElementById('RK').innerHTML=sl.map(function(d,i){var link=d.url?'<a href="'+d.url+'" target="_blank" style="color:var(--p);text-decoration:underline">'+sT(d.title,60)+'</a>':sT(d.title,60);return'<li class="ri"><div class="rn">'+(i+1)+'</div><div class="rf"><div class="rm">'+link+' '+rkBadge(d._rank||'D')+'</div><div class="rd">'+(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="rd">表示:'+fmt(d.impressions)+' クリック:'+fmt(d.clicks)+' 応募:'+fmt(d.applications)+' 費用:'+fY(d.cost)+'</div></div><div class="rv">'+fV(k,d[k])+'</div></li>'}).join('');
 }
 
 function rFun(){
@@ -505,16 +550,16 @@ function rReg(){
   sc.forEach(function(d){d.title=d.n;d._v=d.aCpa});hbar('c17','rgP',sc,'CPA(¥)','#28a745');
 }
 
-var TC2=[{k:'title',l:'求人',t:'x'},{k:'company',l:'企業名',t:'x'},{k:'prefecture',l:'都道府県',t:'x'},{k:'city',l:'市区町村',t:'x'},{k:'status',l:'ステータス',t:'s'},{k:'impressions',l:'表示回数',t:'n'},{k:'ctr',l:'CTR',t:'p'},{k:'clicks',l:'クリック数',t:'n'},{k:'asr',l:'ASR',t:'p'},{k:'appStarts',l:'応募開始',t:'n'},{k:'completionRate',l:'完了率',t:'p'},{k:'applications',l:'応募数',t:'n'},{k:'ar',l:'AR',t:'p'},{k:'cost',l:'費用',t:'y'},{k:'cpc',l:'CPC',t:'y'},{k:'cpas',l:'CPAS',t:'y'},{k:'cpa',l:'CPA',t:'y'}];
+var TC2=[{k:'_rank',l:'ランク',t:'r'},{k:'title',l:'求人',t:'x'},{k:'company',l:'企業名',t:'x'},{k:'prefecture',l:'都道府県',t:'x'},{k:'status',l:'ステータス',t:'s'},{k:'_score',l:'スコア',t:'n'},{k:'impressions',l:'表示回数',t:'n'},{k:'ctr',l:'CTR',t:'p'},{k:'clicks',l:'クリック数',t:'n'},{k:'asr',l:'ASR',t:'p'},{k:'appStarts',l:'応募開始',t:'n'},{k:'completionRate',l:'完了率',t:'p'},{k:'applications',l:'応募数',t:'n'},{k:'ar',l:'AR',t:'p'},{k:'cost',l:'費用',t:'y'},{k:'cpc',l:'CPC',t:'y'},{k:'cpas',l:'CPAS',t:'y'},{k:'cpa',l:'CPA',t:'y'}];
 
 function rTab(){
   var q=(document.getElementById('TI').value||'').toLowerCase();
   var data=flt;
   if(q)data=data.filter(function(d){var vals=Object.values(d);for(var i=0;i<vals.length;i++){if(String(vals[i]).toLowerCase().indexOf(q)!==-1)return true}return false});
-  if(srt.c){var sc=srt.c,sa=srt.a;data=data.slice().sort(function(a,b){var va=a[sc],vb=b[sc];if(typeof va==='number'&&typeof vb==='number')return sa?va-vb:vb-va;return sa?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va))})}
+  if(srt.c){var sc=srt.c,sa=srt.a;data=data.slice().sort(function(a,b){var va=a[sc],vb=b[sc];if(typeof va==='number'&&typeof vb==='number')return sa?va-vb:vb-va;return sa?String(va||'').localeCompare(String(vb||'')):String(vb||'').localeCompare(String(va||''))})}
   document.getElementById('TH').innerHTML=TC2.map(function(c){var s=srt.c===c.k;return'<th data-c="'+c.k+'">'+c.l+'<span style="margin-left:4px;opacity:'+(s?'1':'.5')+'">'+(s?(srt.a?'▲':'▼'):'⇅')+'</span></th>'}).join('');
   var tp=Math.ceil(data.length/PG),st=(pg-1)*PG,pd=data.slice(st,st+PG);
-  document.getElementById('TB').innerHTML=pd.map(function(row){return'<tr>'+TC2.map(function(c){var v=row[c.k];if(c.t==='s')return'<td><span class="sb '+(v==='募集中'?'sa':'se')+'">'+(v||'')+'</span></td>';if(c.t==='p')return'<td class="tr">'+fP(v)+'</td>';if(c.t==='y')return'<td class="tr">'+(v?fY(v):'-')+'</td>';if(c.t==='n')return'<td class="tr">'+fmt(v)+'</td>';if(c.k==='title'){var txt=sT(v,40);return row.url?'<td title="'+(v||'')+'"><a href="'+row.url+'" target="_blank" style="color:var(--p);text-decoration:underline">'+txt+'</a></td>':'<td title="'+(v||'')+'">'+txt+'</td>'}return'<td>'+(v||'')+'</td>'}).join('')+'</tr>'}).join('');
+  document.getElementById('TB').innerHTML=pd.map(function(row){return'<tr>'+TC2.map(function(c){var v=row[c.k];if(c.t==='r')return'<td>'+rkBadge(v||'D')+'</td>';if(c.t==='s')return'<td><span class="sb '+(v==='募集中'?'sa':'se')+'">'+(v||'')+'</span></td>';if(c.t==='p')return'<td class="tr">'+fP(v)+'</td>';if(c.t==='y')return'<td class="tr">'+(v?fY(v):'-')+'</td>';if(c.t==='n')return'<td class="tr">'+fmt(v)+'</td>';if(c.k==='title'){var txt=sT(v,40);return row.url?'<td title="'+(v||'')+'"><a href="'+row.url+'" target="_blank" style="color:var(--p);text-decoration:underline">'+txt+'</a></td>':'<td title="'+(v||'')+'">'+txt+'</td>'}return'<td>'+(v||'')+'</td>'}).join('')+'</tr>'}).join('');
   var pe=document.getElementById('PG');if(tp<=1){pe.innerHTML='';return}
   var h='<button '+(pg<=1?'disabled':'')+' data-p="'+(pg-1)+'">←前</button>';
   for(var i=1;i<=tp;i++){if(tp>10&&Math.abs(i-pg)>3&&i!==1&&i!==tp){if(i===pg-4||i===pg+4)h+='<span>…</span>';continue}h+='<button class="'+(i===pg?'on':'')+'" data-p="'+i+'">'+i+'</button>'}
@@ -524,7 +569,7 @@ document.getElementById('TH').onclick=function(e){var th=e.target.closest('th');
 document.getElementById('TI').oninput=function(){pg=1;rTab()};
 document.getElementById('PG').onclick=function(e){var b=e.target.closest('button');if(!b||b.disabled)return;pg=parseInt(b.getAttribute('data-p'));rTab()};
 
-/* ==== 起動 ==== */
+/* 起動 */
 showLoad('スプレッドシートからデータを取得中...');
 fetchGAS().then(function(ok){
   hideLoad();

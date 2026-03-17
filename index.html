@@ -122,6 +122,8 @@ th:hover{background:#1a3f7a}td{padding:10px 16px;border-bottom:1px solid var(--b
 .ai-n{background:var(--pl);border-left:4px solid var(--p)}
 @media(max-width:1024px){.cg{grid-template-columns:1fr}}
 @media(max-width:768px){.cn{padding:12px}.kg{grid-template-columns:repeat(2,1fr)}.fl{flex-direction:column}.fg{min-width:100%}.hd{padding:16px;flex-direction:column;align-items:flex-start}.hd h1{font-size:1.1rem}}
+.spBtn{padding:6px 12px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#64748b;font-size:13px;cursor:pointer;transition:all .2s;}
+.spBtn.active{background:#4361ee;color:#fff;border-color:#4361ee;}
 </style>
 </head>
 <body>
@@ -153,7 +155,7 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 
 <div class="ld" id="LD"><div class="ld-b"><div class="ld-s"></div><div id="LT">データを読み込み中...</div></div></div>
 <div class="hd">
-<h1>Indeed スポンサー求人ダッシュボード</h1>
+<h1>Indeed 求人ダッシュボード</h1>
 <div class="hd-a">
 <label class="hb ac" for="f1">+ CSV追加</label><input type="file" id="f1" accept=".csv" multiple style="display:none">
 <button class="hb sc" id="syncB">再読み込み</button>
@@ -187,6 +189,14 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 <div class="fg"><label>ステータス</label><select id="FS"><option value="">すべて</option><option value="募集中">募集中</option><option value="募集終了">募集終了</option></select></div>
 <div class="fg"><label>期間</label><select id="FD"><option value="">最新</option></select></div>
 <div class="fg"><label>キーワード</label><input id="FK" placeholder="求人名で検索..."></div>
+<div style="display:flex;flex-direction:column;gap:4px;">
+  <label style="font-size:12px;color:#64748b;font-weight:600;">求人種別</label>
+  <div style="display:flex;gap:4px;" id="spFilter">
+    <button class="spBtn active" data-sp="all" onclick="setSP('all')">すべて</button>
+    <button class="spBtn" data-sp="sponsor" onclick="setSP('sponsor')">スポンサー</button>
+    <button class="spBtn" data-sp="organic" onclick="setSP('organic')">オーガニック</button>
+  </div>
+</div>
 <button class="fr" id="FR">リセット</button>
 </div>
 <div class="tb">
@@ -335,16 +345,45 @@ function extractPeriod(fname){
 
 function calcRanks(data){
   if(!data.length)return;
-  var scored=data.filter(function(d){return d.impressions>0});
-  if(!scored.length){data.forEach(function(d){d._score=0;d._rank='D'});return}
-  function percentile(arr,k){var vals=arr.map(function(d){return d[k]}).sort(function(a,b){return a-b});arr.forEach(function(d){var idx=vals.indexOf(d[k]);d['_p_'+k]=vals.length>1?idx/(vals.length-1):0.5})}
-  percentile(scored,'ctr');percentile(scored,'ar');
-  var withCpa=scored.filter(function(d){return d.cpa>0}),noCpa=scored.filter(function(d){return d.cpa<=0});
-  if(withCpa.length){var cv=withCpa.map(function(d){return d.cpa}).sort(function(a,b){return a-b});withCpa.forEach(function(d){var idx=cv.indexOf(d.cpa);d._p_cpa=cv.length>1?1-(idx/(cv.length-1)):0.5})}
-  noCpa.forEach(function(d){d._p_cpa=0});
-  scored.forEach(function(d){var sc=(d._p_ctr+d._p_ar+d._p_cpa)/3;d._score=Math.round(sc*100);d._rank=sc>=.8?'S':sc>=.6?'A':sc>=.4?'B':sc>=.2?'C':'D'});
-  data.filter(function(d){return d.impressions<=0}).forEach(function(d){d._score=0;d._rank='D'});
+  var sp=data.filter(function(d){return d.cost>0&&d.impressions>0});
+  var og=data.filter(function(d){return(!d.cost||d.cost<=0)&&d.impressions>0});
+  var noImp=data.filter(function(d){return!d.impressions||d.impressions<=0});
+
+  function pct(arr,key,inv){
+    var vals=arr.map(function(d){return d[key]||0}).sort(function(a,b){return a-b});
+    arr.forEach(function(d){
+      var v=d[key]||0;
+      var idx=vals.indexOf(v);
+      var p=vals.length>1?idx/(vals.length-1):0.5;
+      d['_p_'+key]=inv?1-p:p;
+    });
+  }
+
+  if(sp.length){
+    pct(sp,'ctr',false);
+    pct(sp,'ar',false);
+    pct(sp,'cpa',true);
+    sp.forEach(function(d){
+      d._score=Math.round((d._p_ctr*33+d._p_ar*33+d._p_cpa*34));
+      d._rank=d._score>=80?'S':d._score>=60?'A':d._score>=40?'B':d._score>=20?'C':'D';
+      d._rankType='sponsor';
+    });
+  }
+
+  if(og.length){
+    pct(og,'ctr',false);
+    pct(og,'ar',false);
+    pct(og,'impressions',false);
+    og.forEach(function(d){
+      d._score=Math.round((d._p_ctr*40+d._p_ar*40+d._p_impressions*20));
+      d._rank=d._score>=80?'S':d._score>=60?'A':d._score>=40?'B':d._score>=20?'C':'D';
+      d._rankType='organic';
+    });
+  }
+
+  noImp.forEach(function(d){d._score=0;d._rank='D';d._rankType=d.cost>0?'sponsor':'organic';});
 }
+
 
 function parseCSV(text,period){
   if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
@@ -482,7 +521,21 @@ function popFilt(){
 }
 ['FP','FS','FD'].forEach(function(id){document.getElementById(id).onchange=applyF});
 document.getElementById('FK').oninput=applyF;
-document.getElementById('FR').onclick=function(){['FP','FS','FD'].forEach(function(id){document.getElementById(id).value=''});document.getElementById('FK').value='';document.querySelectorAll('#MCD input').forEach(function(cb){cb.checked=true});updCoFilter()};
+document.getElementById('FR').onclick=function(){['FP','FS','FD'].forEach(function(id){document.getElementById(id).value=''});document.getElementById('FK').value='';document.querySelectorAll('#MCD input').forEach(function(cb){cb.checked=true});
+spMode='all';
+document.querySelectorAll('.spBtn').forEach(function(b){
+ b.classList.toggle('active',b.getAttribute('data-sp')==='all');
+});
+updCoFilter()};
+
+var spMode='all';
+function setSP(mode){
+  spMode=mode;
+  document.querySelectorAll('.spBtn').forEach(function(b){
+    b.classList.toggle('active',b.getAttribute('data-sp')===mode);
+  });
+  applyF();
+}
 
 function applyF(){
   var pr=document.getElementById('FP').value,st=document.getElementById('FS').value,pd=document.getElementById('FD').value,kw=document.getElementById('FK').value.toLowerCase();
@@ -496,6 +549,8 @@ function applyF(){
     if(pd&&d._period!==pd)return false;
     if(!pd&&latestPeriod&&d._period!==latestPeriod)return false;
     if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;
+    if(spMode==='sponsor' && (!d.cost || d.cost<=0)) return false;
+    if(spMode==='organic' && d.cost>0) return false;
     return true;
   });
   calcRanks(flt);pg=1;pfRank='ALL';renderAll();

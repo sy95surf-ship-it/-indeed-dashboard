@@ -511,7 +511,7 @@ function init(){
   document.getElementById('s3').textContent=periods.length;
   buildCompanyFilter();
   var pOpts='<option value="">最新</option>';
-  periods.forEach(function(p){if(p!=='unknown'){var d=raw.find(function(r){return r._period===p});var label=d?d._periodStart+'〜'+d._periodEnd:p;pOpts+='<option value="'+p+'">'+label+'</option>'}});
+  periods.forEach(function(p){if(p!=='unknown'){var parts=p.split('_');var label=p;if(parts.length===2&&parts[0].length===8&&parts[1].length===8){var s=parts[0],e=parts[1];label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'')}pOpts+='<option value="'+p+'">'+label+'</option>'}});
   document.getElementById('FD').innerHTML=pOpts;
   popFilt();applyF();
 }

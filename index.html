@@ -483,22 +483,52 @@ document.addEventListener('click',function(e){if(!document.getElementById('MCW')
 function buildCompanyFilter(){
   var co={};raw.forEach(function(d){co[d.company]=1});
   var cs=Object.keys(co).sort();selCo={};
-  var html='<div class="mc-acts"><button id="MCA">全選択</button><button id="MCN">全解除</button></div>';
-  cs.forEach(function(c){html+='<label><input type="checkbox" value="'+c+'" checked>'+c+'</label>'});
+  var html='<div class="mc-acts"><input id="MCS" type="text" placeholder="企業名を検索..." style="width:100%;padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;margin-bottom:8px;box-sizing:border-box;"><button id="MCA">全選択</button><button id="MCN">全解除</button></div>';
+  html+='<div id="MCL">';
+  cs.forEach(function(c){html+='<label data-name="'+c.toLowerCase()+'"><input type="checkbox" value="'+c+'" checked>'+c+'</label>'});
+  html+='</div>';
   document.getElementById('MCD').innerHTML=html;
-  document.getElementById('MCA').onclick=function(e){e.stopPropagation();document.querySelectorAll('#MCD input').forEach(function(cb){cb.checked=true});updCoFilter()};
-  document.getElementById('MCN').onclick=function(e){e.stopPropagation();document.querySelectorAll('#MCD input').forEach(function(cb){cb.checked=false});updCoFilter()};
-  document.querySelectorAll('#MCD input[type=checkbox]').forEach(function(cb){cb.onchange=updCoFilter});
+  document.getElementById('MCS').onclick=function(e){e.stopPropagation()};
+  document.getElementById('MCS').oninput=function(){
+    var q=this.value.toLowerCase();
+    document.querySelectorAll('#MCL label').forEach(function(lb){
+      lb.style.display=lb.getAttribute('data-name').indexOf(q)>-1?'':'none';
+    });
+  };
+  document.getElementById('MCA').onclick=function(e){e.stopPropagation();document.querySelectorAll('#MCL input').forEach(function(cb){cb.checked=true});updCoFilter()};
+  document.getElementById('MCN').onclick=function(e){e.stopPropagation();document.querySelectorAll('#MCL input').forEach(function(cb){cb.checked=false});updCoFilter()};
+  document.querySelectorAll('#MCL input[type=checkbox]').forEach(function(cb){cb.onchange=updCoFilter});
   updCoFilter();
 }
 function updCoFilter(){
-  selCo={};var all=document.querySelectorAll('#MCD input[type=checkbox]'),cnt=0;
+  selCo={};var all=document.querySelectorAll('#MCL input[type=checkbox]'),cnt=0;
   all.forEach(function(cb){if(cb.checked){selCo[cb.value]=1;cnt++}});
   var btn=document.getElementById('MCB');
   btn.innerHTML=cnt===all.length?'すべて <span>▼</span>':cnt+'社選択中 <span>▼</span>';
   var tags=document.getElementById('MCT');
   if(cnt<all.length&&cnt<=5){tags.innerHTML=Object.keys(selCo).map(function(c){return'<span class="mc-tag">'+c+'</span>'}).join('')}else{tags.innerHTML=''}
   applyF();
+}
+
+function buildCompanyFilter(){
+  var co={};raw.forEach(function(d){co[d.company]=1});
+  var cs=Object.keys(co).sort();selCo={};
+  var html='<div class="mc-acts"><input id="MCS" type="text" placeholder="企業名を検索..." style="width:100%;padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;margin-bottom:8px;box-sizing:border-box;"><button id="MCA">全選択</button><button id="MCN">全解除</button></div>';
+  html+='<div id="MCL">';
+  cs.forEach(function(c){html+='<label data-name="'+c.toLowerCase()+'"><input type="checkbox" value="'+c+'" checked>'+c+'</label>'});
+  html+='</div>';
+  document.getElementById('MCD').innerHTML=html;
+  document.getElementById('MCS').onclick=function(e){e.stopPropagation()};
+  document.getElementById('MCS').oninput=function(){
+    var q=this.value.toLowerCase();
+    document.querySelectorAll('#MCL label').forEach(function(lb){
+      lb.style.display=lb.getAttribute('data-name').indexOf(q)>-1?'':'none';
+    });
+  };
+  document.getElementById('MCA').onclick=function(e){e.stopPropagation();document.querySelectorAll('#MCL input').forEach(function(cb){cb.checked=true});updCoFilter()};
+  document.getElementById('MCN').onclick=function(e){e.stopPropagation();document.querySelectorAll('#MCL input').forEach(function(cb){cb.checked=false});updCoFilter()};
+  document.querySelectorAll('#MCL input[type=checkbox]').forEach(function(cb){cb.onchange=updCoFilter});
+  updCoFilter();
 }
 
 function init(){
@@ -675,7 +705,7 @@ document.getElementById('PG').onclick=function(e){var b=e.target.closest('button
 /* 推移タブ */
 document.getElementById('TM').onchange=rTrend;
 function rTrend(){
-  var periods={};raw.forEach(function(d){if(d._period&&d._period!=='unknown'){if(!periods[d._period])periods[d._period]={key:d._period,start:d._periodStart,end:d._periodEnd,rows:[]};periods[d._period].rows.push(d)}});
+  var coAll=Object.keys(selCo).length===0;var pr=document.getElementById('FP').value;var st=document.getElementById('FS').value;var kw=document.getElementById('FK').value.toLowerCase();var src=raw.filter(function(d){if(!coAll&&!selCo[d.company])return false;if(pr&&d.prefecture!==pr)return false;if(st&&d.status!==st)return false;if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;if(spMode==='sponsor'&&(!d.cost||d.cost<=0))return false;if(spMode==='organic'&&d.cost>0)return false;return true});var periods={};src.forEach(function(d){if(d._period&&d._period!=='unknown'){if(!periods[d._period])periods[d._period]={key:d._period,start:d._periodStart,end:d._periodEnd,rows:[]};periods[d._period].rows.push(d)}});
   var pArr=Object.keys(periods).sort().map(function(k){return periods[k]});
   if(pArr.length<2){
     dx('trend');
@@ -687,7 +717,7 @@ function rTrend(){
   var isPct=PCT.indexOf(mk)!==-1;
   var labels=[],vals=[];
   pArr.forEach(function(p){
-    var label=p.start+'〜'+p.end;labels.push(label);
+    var label=p.key;var parts=label.split('_');if(parts.length===2&&parts[0].length===8&&parts[1].length===8){var s=parts[0],e=parts[1];label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'')}labels.push(label);
     if(isPct||mk==='cpa'){vals.push(av(p.rows,mk))}
     else{vals.push(sm(p.rows,mk))}
   });
@@ -710,7 +740,8 @@ function rTrend(){
       }
     });
     changes.sort(function(a,b){return b.appDiff-a.appDiff});
-    var html='<div style="padding:16px 0"><strong>'+prev.start+'〜'+prev.end+' → '+cur.start+'〜'+cur.end+'</strong></div>';
+    function shortLabel(k){var parts=k.split('_');if(parts.length===2&&parts[0].length===8&&parts[1].length===8){var s=parts[0],e=parts[1];return s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'')}return k}
+    var html='<div style="padding:16px 0"><strong>'+shortLabel(prev.key)+' → '+shortLabel(cur.key)+'</strong></div>';
     var up=changes.filter(function(c){return c.appDiff>0}),down=changes.filter(function(c){return c.appDiff<0});
     if(up.length){html+='<h4 style="color:var(--s);margin:12px 0 8px">応募増加（'+up.length+'件）</h4>';up.slice(0,10).forEach(function(c){html+='<div class="ai-g ai-i">'+sT(c.title,40)+' ('+c.company+') — 応募 +'+c.appDiff+'件（'+c.prevApp+'→'+c.curApp+'）</div>'})}
     if(down.length){html+='<h4 style="color:var(--d);margin:12px 0 8px">応募減少（'+down.length+'件）</h4>';down.slice(0,10).forEach(function(c){html+='<div class="ai-d ai-i">'+sT(c.title,40)+' ('+c.company+') — 応募 '+c.appDiff+'件（'+c.prevApp+'→'+c.curApp+'）</div>'})}

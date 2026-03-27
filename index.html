@@ -279,7 +279,15 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 
 <div class="tp" id="p-table">
 <div class="tw">
-<div class="th"><input class="ti" id="TI" placeholder="テーブル内検索..."><button class="eb" id="EF">CSV出力</button></div>
+<div class="th">
+<input class="ti" id="TI" placeholder="テーブル内検索...">
+<button class="eb" id="NF" style="background:#f8fafc;color:#475569;border:1px solid #e2e8f0;margin-right:8px;cursor:pointer;padding:6px 14px;border-radius:8px;font-size:.85rem;">絞り込み ▼</button>
+<button class="eb" id="EF">CSV出力</button>
+</div>
+<div id="NFP" style="display:none;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:16px;">
+<div id="NFL"></div>
+<button id="NFA" style="margin-top:8px;padding:6px 14px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#4361ee;font-size:.85rem;cursor:pointer;">＋ 条件を追加</button>
+</div>
 <div class="ts"><table><thead><tr id="TH"></tr></thead><tbody id="TB"></tbody></table></div>
 <div class="pg" id="PG"></div>
 </div>
@@ -735,6 +743,20 @@ var TC2=[{k:'_rank',l:'ランク',t:'r'},{k:'title',l:'求人',t:'x'},{k:'compan
 function rTab(){
   var q=(document.getElementById('TI').value||'').toLowerCase(),data=flt;
   if(q)data=data.filter(function(d){var vals=Object.values(d);for(var i=0;i<vals.length;i++){if(String(vals[i]).toLowerCase().indexOf(q)!==-1)return true}return false});
+
+  // 絞り込み条件を適用
+  var nfRows=document.querySelectorAll('#NFL .nf-row');
+  nfRows.forEach(function(row){
+    var key=row.querySelector('.nf-key').value;
+    var op=row.querySelector('.nf-op').value;
+    var val=parseFloat(row.querySelector('.nf-val').value);
+    if(!key||isNaN(val))return;
+    data=data.filter(function(d){
+      var dv=parseFloat(d[key])||0;
+      return op==='gte'?dv>=val:dv<=val;
+    });
+  });
+
   if(srt.c){var sc=srt.c,sa=srt.a;data=data.slice().sort(function(a,b){var va=a[sc],vb=b[sc];if(typeof va==='number'&&typeof vb==='number')return sa?va-vb:vb-va;return sa?String(va||'').localeCompare(String(vb||'')):String(vb||'').localeCompare(String(va||''))})}
   document.getElementById('TH').innerHTML=TC2.map(function(c){var s=srt.c===c.k;return'<th data-c="'+c.k+'">'+c.l+'<span style="margin-left:4px;opacity:'+(s?'1':'.5')+'">'+(s?(srt.a?'▲':'▼'):'⇅')+'</span></th>'}).join('');
   var tp=Math.ceil(data.length/PG),st=(pg-1)*PG,pd=data.slice(st,st+PG);
@@ -744,6 +766,48 @@ function rTab(){
   for(var i=1;i<=tp;i++){if(tp>10&&Math.abs(i-pg)>3&&i!==1&&i!==tp){if(i===pg-4||i===pg+4)h+='<span>…</span>';continue}h+='<button class="'+(i===pg?'on':'')+'" data-p="'+i+'">'+i+'</button>'}
   h+='<button '+(pg>=tp?'disabled':'')+' data-p="'+(pg+1)+'">次→</button>';pe.innerHTML=h;
 }
+// 絞り込みパネル
+var nfOpts=[
+  {k:'cpa',l:'応募単価（CPA）',u:'円'},
+  {k:'cpc',l:'クリック単価（CPC）',u:'円'},
+  {k:'cost',l:'費用合計',u:'円'},
+  {k:'ctr',l:'CTR',u:'%'},
+  {k:'asr',l:'応募率（ASR）',u:'%'},
+  {k:'ar',l:'応募完了率（AR）',u:'%'},
+  {k:'impressions',l:'表示回数',u:'件'},
+  {k:'clicks',l:'クリック数',u:'件'},
+  {k:'apply_starts',l:'応募開始数',u:'件'},
+  {k:'applications',l:'応募数',u:'件'}
+];
+document.getElementById('NF').onclick=function(){
+  var p=document.getElementById('NFP');
+  p.style.display=p.style.display==='none'?'block':'none';
+  this.innerHTML=p.style.display==='none'?'絞り込み ▼':'絞り込み ▲';
+};
+function addNFRow(){
+  var div=document.createElement('div');
+  div.className='nf-row';
+  div.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;';
+  var sel='<select class="nf-key" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem;"><option value="">指標を選択</option>';
+  nfOpts.forEach(function(o){sel+='<option value="'+o.k+'">'+o.l+'</option>'});
+  sel+='</select>';
+  div.innerHTML=sel+
+    '<select class="nf-op" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem;"><option value="gte">以上</option><option value="lte">以下</option></select>'+
+    '<input class="nf-val" type="number" placeholder="数値" style="width:100px;padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem;">'+
+    '<span class="nf-unit" style="font-size:.85rem;color:#64748b;"></span>'+
+    '<button onclick="this.parentElement.remove();pg=1;rTab();" style="background:none;border:none;color:#dc2626;font-size:1.1rem;cursor:pointer;padding:4px 8px;">✕</button>';
+  div.querySelector('.nf-key').onchange=function(){
+    var u='';var k=this.value;
+    nfOpts.forEach(function(o){if(o.k===k)u=o.u});
+    div.querySelector('.nf-unit').textContent=u;
+    pg=1;rTab();
+  };
+  div.querySelector('.nf-op').onchange=function(){pg=1;rTab()};
+  div.querySelector('.nf-val').oninput=function(){pg=1;rTab()};
+  document.getElementById('NFL').appendChild(div);
+}
+document.getElementById('NFA').onclick=addNFRow;
+
 document.getElementById('TH').onclick=function(e){var th=e.target.closest('th');if(!th)return;var c=th.getAttribute('data-c');if(srt.c===c)srt.a=!srt.a;else{srt.c=c;srt.a=true}rTab()};
 document.getElementById('TI').oninput=function(){pg=1;rTab()};
 document.getElementById('PG').onclick=function(e){var b=e.target.closest('button');if(!b||b.disabled)return;pg=parseInt(b.getAttribute('data-p'));rTab()};

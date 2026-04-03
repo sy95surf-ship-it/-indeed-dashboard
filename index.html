@@ -744,18 +744,20 @@ function rTab(){
   var q=(document.getElementById('TI').value||'').toLowerCase(),data=flt;
   if(q)data=data.filter(function(d){var vals=Object.values(d);for(var i=0;i<vals.length;i++){if(String(vals[i]).toLowerCase().indexOf(q)!==-1)return true}return false});
 
-  // 絞り込み条件を適用
-  var nfRows=document.querySelectorAll('#NFL .nf-row');
-  nfRows.forEach(function(row){
-    var key=row.querySelector('.nf-key').value;
-    var op=row.querySelector('.nf-op').value;
-    var val=parseFloat(row.querySelector('.nf-val').value);
-    if(!key||isNaN(val))return;
-    data=data.filter(function(d){
-      var dv=parseFloat(d[key])||0;
-      return op==='gte'?dv>=val:dv<=val;
-    });
+ // 絞り込み条件を適用
+var nfRows=document.querySelectorAll('#NFL .nf-row');
+nfRows.forEach(function(row){
+  var key=row.querySelector('.nf-key').value;
+  var op=row.querySelector('.nf-op').value;
+  var val=parseFloat(row.querySelector('.nf-val').value);
+  if(!key||isNaN(val))return;
+  data=data.filter(function(d){
+    var dv=parseFloat(d[key])||0;
+    // %系指標は0〜1で格納されているので100倍して比較
+    if(key==='ctr'||key==='asr'||key==='ar'||key==='completionRate') dv=dv*100;
+    return op==='gte'?dv>=val:dv<=val;
   });
+});
 
   if(srt.c){var sc=srt.c,sa=srt.a;data=data.slice().sort(function(a,b){var va=a[sc],vb=b[sc];if(typeof va==='number'&&typeof vb==='number')return sa?va-vb:vb-va;return sa?String(va||'').localeCompare(String(vb||'')):String(vb||'').localeCompare(String(va||''))})}
   document.getElementById('TH').innerHTML=TC2.map(function(c){var s=srt.c===c.k;return'<th data-c="'+c.k+'">'+c.l+'<span style="margin-left:4px;opacity:'+(s?'1':'.5')+'">'+(s?(srt.a?'▲':'▼'):'⇅')+'</span></th>'}).join('');

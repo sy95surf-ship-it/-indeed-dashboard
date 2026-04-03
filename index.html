@@ -102,7 +102,7 @@ th:hover{background:#1a3f7a}td{padding:10px 16px;border-bottom:1px solid var(--b
 /* 企業複数選択 */
 .mc-w{position:relative}
 .mc-btn{padding:8px 12px;border:1px solid var(--b);border-radius:8px;font-size:.9rem;background:#fff;cursor:pointer;min-width:200px;text-align:left;display:flex;justify-content:space-between;align-items:center}
-.mc-dd{position:absolute;top:100%;left:0;right:0;background:var(--c);border:1px solid var(--b);border-radius:8px;box-shadow:var(--sl);max-height:300px;overflow-y:auto;z-index:200;display:none;margin-top:4px}
+.mc-dd{position:absolute;top:100%;left:0;background:var(--c);border:1px solid var(--b);border-radius:8px;box-shadow:var(--sl);max-height:none;height:300px;overflow-y:auto;z-index:200;display:none;margin-top:4px;min-width:350px;resize:both}
 .mc-dd.on{display:block}
 .mc-dd label{display:flex;align-items:center;padding:8px 12px;cursor:pointer;font-size:.85rem;gap:8px}
 .mc-dd label:hover{background:var(--pl)}
@@ -161,7 +161,6 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 <button class="hb sc" id="syncB">再読み込み</button>
 <button class="hb" id="mgrB">データ管理</button>
 <button class="hb" id="expB">CSV出力</button>
-<button class="hb dc" id="clrB">全削除</button>
 </div>
 </div>
 <div class="tc" id="TC"></div>
@@ -184,7 +183,7 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 <div class="mg" id="MG"><div class="mg-h"><h3>登録企業一覧</h3></div><div class="ml" id="ML"></div></div>
 <div id="DB" style="display:none">
 <div class="fl" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
-<div class="fg" style="min-width:180px;max-width:220px;"><label>企業名（複数選択可）</label><div class="mc-w" id="MCW"><div class="mc-btn" id="MCB">すべて <span>▼</span></div><div class="mc-dd" id="MCD"></div><div class="mc-tags" id="MCT"></div></div></div>
+<div class="fg" style="min-width:180px;"><label>企業名（複数選択可）</label><div class="mc-w" id="MCW"><div class="mc-btn" id="MCB">すべて <span>▼</span></div><div class="mc-dd" id="MCD"></div><div class="mc-tags" id="MCT"></div></div></div>
 <div class="fg" style="min-width:100px;max-width:140px;"><label>都道府県</label><select id="FP"><option value="">すべて</option></select></div>
 <div class="fg" style="min-width:100px;max-width:140px;"><label>ステータス</label><select id="FS"><option value="">すべて</option><option value="募集中">募集中</option><option value="募集終了">募集終了</option></select></div>
 <div class="fg" style="min-width:120px;max-width:160px;"><label>期間</label><select id="FD"><option value="">最新</option></select></div>
@@ -316,7 +315,7 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 </div>
 
 <script>
-var GAS_URL='https://script.google.com/macros/s/AKfycbziNIR7RTT9hIs2Ed9L4qrF6n0NJM52LAoKnLNXE7WLeC7053HP94TsXXeVxnuK9mz1jQ/exec';
+var GAS_URL='https://script.google.com/macros/s/AKfycbyWyJgxUyZVFX5am4OqGlsmI1o0j5gg2H0UhcpAuT9vIVZseworMV1WwBk8KE5bjwVVgA/exec';
 var raw=[],flt=[],ch={},srt={c:null,a:true},pg=1,pfRank='ALL',selCo={};
 var PG=25;
 var KS=['title','campaign','country','prefecture','city','company','refId','createdAt','updatedAt','source','impressions','ctr','clicks','asr','appStarts','completionRate','applications','ar','cost','cpc','cpas','cpa','url','category','status'];
@@ -469,7 +468,6 @@ document.body.ondragover=function(e){e.preventDefault();document.getElementById(
 document.body.ondragleave=function(){document.getElementById('UA').classList.remove('dg')};
 document.body.ondrop=function(e){e.preventDefault();document.getElementById('UA').classList.remove('dg');handleFiles(e.dataTransfer.files)};
 document.getElementById('syncB').onclick=function(){showLoad('取得中...');fetchGAS().then(function(){hideLoad();init();loadStaff();toast('同期完了',raw.length+'件')})};
-document.getElementById('clrB').onclick=function(){dlg('全削除','表示をリセットしますか？').then(function(ok){if(ok){raw=[];init();toast('リセット','クリアしました')}})};
 document.getElementById('mgrB').onclick=function(){var el=document.getElementById('MG');el.classList.toggle('on');if(el.classList.contains('on'))renderMgr()};
 function renderMgr(){
   var g={};raw.forEach(function(d){if(!g[d.company])g[d.company]=[];g[d.company].push(d)});
@@ -494,7 +492,8 @@ function buildCompanyFilter(){
   var cs=Object.keys(co).sort();selCo={};
   var html='<div class="mc-acts"><input id="MCS" type="text" placeholder="企業名を検索..." style="width:100%;padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;margin-bottom:8px;box-sizing:border-box;"><button id="MCA">全選択</button><button id="MCN">全解除</button></div>';
   html+='<div id="MCL">';
-  cs.forEach(function(c){html+='<label data-name="'+c.toLowerCase()+'"><input type="checkbox" value="'+c+'" checked>'+c+'</label>'});
+  cs.forEach(function(c){html+='<label data-name="'+c.toLowerCase()+'"><input type="checkbox" value="'+c+'" checked>'+eN(c)+'</label>'});
+
   html+='</div>';
   document.getElementById('MCD').innerHTML=html;
   document.getElementById('MCS').onclick=function(e){e.stopPropagation()};
@@ -509,11 +508,22 @@ function buildCompanyFilter(){
   document.querySelectorAll('#MCL input[type=checkbox]').forEach(function(cb){cb.onchange=updCoFilter});
   updCoFilter();
 }
+
+function eN(name){
+  return (window.companyEmoji&&window.companyEmoji[name]?window.companyEmoji[name]+' ':'')+name;
+}
+
+function eBig(company){
+  var e=window.companyEmoji&&window.companyEmoji[company]?window.companyEmoji[company]:'';
+  return e?'<span style="font-size:2rem;margin-left:12px">'+e+'</span>':'';
+}
+
 var staffMap={};
 function loadStaff(){
   fetch(GAS_URL+'?action=getStaff').then(function(r){return r.text()}).then(function(txt){
     var d=JSON.parse(txt);
     if(d.success&&d.staff){
+      window.companyEmoji=d.emojis||{};
       staffMap={};
       var html='<div class="mc-acts"><button id="STA">全選択</button><button id="STN">全解除</button></div><div id="STL">';
       d.staff.forEach(function(s){
@@ -526,6 +536,7 @@ function loadStaff(){
       document.getElementById('STN').onclick=function(e){e.stopPropagation();document.querySelectorAll('#STL input').forEach(function(cb){cb.checked=false});applyStaffFilter()};
       document.querySelectorAll('#STL input[type=checkbox]').forEach(function(cb){cb.onchange=applyStaffFilter});
       applyStaffFilter();
+      buildCompanyFilter();
     }
   }).catch(function(){});
 }
@@ -561,27 +572,6 @@ function updCoFilter(){
   var tags=document.getElementById('MCT');
   if(cnt<all.length&&cnt<=5){tags.innerHTML=Object.keys(selCo).map(function(c){return'<span class="mc-tag">'+c+'</span>'}).join('')}else{tags.innerHTML=''}
   applyF();
-}
-
-function buildCompanyFilter(){
-  var co={};raw.forEach(function(d){co[d.company]=1});
-  var cs=Object.keys(co).sort();selCo={};
-  var html='<div class="mc-acts"><input id="MCS" type="text" placeholder="企業名を検索..." style="width:100%;padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;margin-bottom:8px;box-sizing:border-box;"><button id="MCA">全選択</button><button id="MCN">全解除</button></div>';
-  html+='<div id="MCL">';
-  cs.forEach(function(c){html+='<label data-name="'+c.toLowerCase()+'"><input type="checkbox" value="'+c+'" checked>'+c+'</label>'});
-  html+='</div>';
-  document.getElementById('MCD').innerHTML=html;
-  document.getElementById('MCS').onclick=function(e){e.stopPropagation()};
-  document.getElementById('MCS').oninput=function(){
-    var q=this.value.toLowerCase();
-    document.querySelectorAll('#MCL label').forEach(function(lb){
-      lb.style.display=lb.getAttribute('data-name').indexOf(q)>-1?'':'none';
-    });
-  };
-  document.getElementById('MCA').onclick=function(e){e.stopPropagation();document.querySelectorAll('#MCL input').forEach(function(cb){cb.checked=true});updCoFilter()};
-  document.getElementById('MCN').onclick=function(e){e.stopPropagation();document.querySelectorAll('#MCL input').forEach(function(cb){cb.checked=false});updCoFilter()};
-  document.querySelectorAll('#MCL input[type=checkbox]').forEach(function(cb){cb.onchange=updCoFilter});
-  updCoFilter();
 }
 
 function init(){
@@ -687,7 +677,7 @@ function rRank(){
   var isPct=PCT.indexOf(k)!==-1;
   sl.forEach(function(d){d._v=isPct?d[k]*100:d[k]});
   dx('rank');ch.rank=new Chart(document.getElementById('c4'),{type:'bar',data:{labels:sl.map(function(d){return sT(d.title,30)}),datasets:[{data:sl.map(function(d){return d._v}),backgroundColor:sl.map(function(_,i){return CL[i%CL.length]})}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{beginAtZero:true}}}});
-  document.getElementById('RK').innerHTML=sl.map(function(d,i){var link=d.url?'<a href="'+d.url+'" target="_blank" style="color:var(--p);text-decoration:underline">'+sT(d.title,60)+'</a>':sT(d.title,60);return'<li class="ri"><div class="rn">'+(i+1)+'</div><div class="rf"><div class="rm">'+link+' '+rkBadge(d._rank||'D')+'</div><div class="rd">'+(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="rd">表示:'+fmt(d.impressions)+' クリック:'+fmt(d.clicks)+' 応募:'+fmt(d.applications)+' 費用:'+fY(d.cost)+'</div></div><div class="rv">'+fV(k,d[k])+'</div></li>'}).join('');
+    document.getElementById('RK').innerHTML=sl.map(function(d,i){var link=d.url?'<a href="'+d.url+'" target="_blank" style="color:var(--p);text-decoration:underline">'+sT(d.title,60)+'</a>':sT(d.title,60);return'<li class="ri"><div class="rn">'+(i+1)+'</div><div class="rf"><div class="rm"><span style="display:inline-block;min-width:400px;vertical-align:middle">'+link+'</span>'+eBig(d.company)+' '+rkBadge(d._rank||'D')+'</div><div class="rd">'+(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="rd">表示:'+fmt(d.impressions)+' クリック:'+fmt(d.clicks)+' 応募:'+fmt(d.applications)+' 費用:'+fY(d.cost)+'</div></div><div class="rv">'+fV(k,d[k])+'</div></li>'}).join('');
 }
 
 function rFun(){
@@ -761,8 +751,8 @@ nfRows.forEach(function(row){
 
   if(srt.c){var sc=srt.c,sa=srt.a;data=data.slice().sort(function(a,b){var va=a[sc],vb=b[sc];if(typeof va==='number'&&typeof vb==='number')return sa?va-vb:vb-va;return sa?String(va||'').localeCompare(String(vb||'')):String(vb||'').localeCompare(String(va||''))})}
   document.getElementById('TH').innerHTML=TC2.map(function(c){var s=srt.c===c.k;return'<th data-c="'+c.k+'">'+c.l+'<span style="margin-left:4px;opacity:'+(s?'1':'.5')+'">'+(s?(srt.a?'▲':'▼'):'⇅')+'</span></th>'}).join('');
-  var tp=Math.ceil(data.length/PG),st=(pg-1)*PG,pd=data.slice(st,st+PG);
-  document.getElementById('TB').innerHTML=pd.map(function(row){return'<tr>'+TC2.map(function(c){var v=row[c.k];if(c.t==='r')return'<td>'+rkBadge(v||'D')+'</td>';if(c.t==='s')return'<td><span class="sb '+(v==='募集中'?'sa':'se')+'">'+(v||'')+'</span></td>';if(c.t==='p')return'<td class="tr">'+fP(v)+'</td>';if(c.t==='y')return'<td class="tr">'+(v?fY(v):'-')+'</td>';if(c.t==='n')return'<td class="tr">'+fmt(v)+'</td>';if(c.k==='title'){var txt=sT(v,40);return row.url?'<td title="'+(v||'')+'"><a href="'+row.url+'" target="_blank" style="color:var(--p);text-decoration:underline">'+txt+'</a></td>':'<td title="'+(v||'')+'">'+txt+'</td>'}return'<td>'+(v||'')+'</td>'}).join('')+'</tr>'}).join('');
+   var tp=Math.ceil(data.length/PG),st=(pg-1)*PG,pd=data.slice(st,st+PG);
+  document.getElementById('TB').innerHTML=pd.map(function(row){return'<tr>'+TC2.map(function(c){var v=row[c.k];if(c.t==='r')return'<td>'+rkBadge(v||'D')+'</td>';if(c.t==='s')return'<td><span class="sb '+(v==='募集中'?'sa':'se')+'">'+(v||'')+'</span></td>';if(c.t==='p')return'<td class="tr">'+fP(v)+'</td>';if(c.t==='y')return'<td class="tr">'+(v?fY(v):'-')+'</td>';if(c.t==='n')return'<td class="tr">'+fmt(v)+'</td>';if(c.k==='title'){var txt=sT(v,40);return row.url?'<td title="'+(v||'')+'"><a href="'+row.url+'" target="_blank" style="color:var(--p);text-decoration:underline">'+txt+'</a></td>':'<td title="'+(v||'')+'">'+txt+'</td>'}if(c.k==='company')return'<td>'+eN(v)+'</td>';return'<td>'+(v||'')+'</td>'}).join('')+'</tr>'}).join('');
   var pe=document.getElementById('PG');if(tp<=1){pe.innerHTML='';return}
   var h='<button '+(pg<=1?'disabled':'')+' data-p="'+(pg-1)+'">←前</button>';
   for(var i=1;i<=tp;i++){if(tp>10&&Math.abs(i-pg)>3&&i!==1&&i!==tp){if(i===pg-4||i===pg+4)h+='<span>…</span>';continue}h+='<button class="'+(i===pg?'on':'')+'" data-p="'+i+'">'+i+'</button>'}
@@ -878,7 +868,7 @@ function rPerf(){
   show=show.slice().sort(function(a,b){return(b._score||0)-(a._score||0)});
   document.getElementById('PL').innerHTML=show.map(function(d){
     var titleHtml=d.url?'<a href="'+d.url+'" target="_blank">'+sT(d.title,50)+'</a>':sT(d.title,50);
-    return'<div class="pc"><div class="pc-r '+(d._rank||'D')+'">'+(d._rank||'D')+'</div><div class="pc-i"><div class="pc-t">'+titleHtml+'</div><div class="pc-d">'+(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="pc-m"><span>スコア: '+(d._score||0)+'/100</span><span>CTR: '+fP(d.ctr)+'</span><span>AR: '+fP(d.ar)+'</span><span>CPA: '+(d.cpa?fY(d.cpa):'-')+'</span><span>応募: '+fmt(d.applications)+'</span><span>費用: '+fY(d.cost)+'</span></div></div></div>'
+        return'<div class="pc"><div class="pc-r '+(d._rank||'D')+'">'+(d._rank||'D')+'</div><div class="pc-i"><div class="pc-t"><span style="display:inline-block;min-width:350px;vertical-align:middle">'+titleHtml+'</span>'+eBig(d.company)+'</div><div class="pc-d">'+eN(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="pc-m"><span>スコア: '+(d._score||0)+'/100</span><span>CTR: '+fP(d.ctr)+'</span><span>AR: '+fP(d.ar)+'</span><span>CPA: '+(d.cpa?fY(d.cpa):'-')+'</span><span>応募: '+fmt(d.applications)+'</span><span>費用: '+fY(d.cost)+'</span></div></div></div>'
   }).join('')||'<div style="padding:24px;text-align:center;color:var(--t2)">該当なし</div>';
 }
 

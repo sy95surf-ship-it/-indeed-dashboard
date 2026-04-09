@@ -186,7 +186,7 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 <div class="fg" style="min-width:180px;"><label>企業名（複数選択可）</label><div class="mc-w" id="MCW"><div class="mc-btn" id="MCB">すべて <span>▼</span></div><div class="mc-dd" id="MCD"></div><div class="mc-tags" id="MCT"></div></div></div>
 <div class="fg" style="min-width:100px;max-width:140px;"><label>都道府県</label><select id="FP"><option value="">すべて</option></select></div>
 <div class="fg" style="min-width:100px;max-width:140px;"><label>ステータス</label><select id="FS"><option value="">すべて</option><option value="募集中">募集中</option><option value="募集終了">募集終了</option></select></div>
-<div class="fg" style="min-width:120px;max-width:160px;"><label>期間</label><select id="FD"><option value="">最新</option></select></div>
+<div class="fg" style="min-width:240px;"><label>期間</label><div class="mc-w" id="PDW"><div class="mc-btn" id="PDB">最新 <span>▼</span></div><div class="mc-dd" id="PDD" style="min-width:280px;height:auto;max-height:400px;overflow-y:auto;resize:vertical;padding:8px;"></div></div></div>
 <div class="fg" style="min-width:140px;max-width:180px;"><label>担当者</label><div class="mc-w" id="STW"><div class="mc-btn" id="STB">すべて <span>▼</span></div><div class="mc-dd" id="STD"></div></div></div>
 <div class="fg" style="min-width:140px;max-width:180px;"><label>キーワード</label><input id="FK" placeholder="求人名で検索..."></div>
 <div style="display:flex;flex-direction:column;gap:4px;">
@@ -210,6 +210,7 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 <button class="tt" data-t="trend">推移</button>
 <button class="tt" data-t="performance">パフォーマンス</button>
 <button class="tt" data-t="analysis">分析</button>
+<button class="tt" data-t="compare">期間比較</button>
 </div>
 
 <div class="tp on" id="p-overview">
@@ -311,6 +312,51 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 <div class="tp" id="p-analysis">
 <div class="ai-w"><h3>自動分析レポート</h3><div id="AI"></div></div>
 </div>
+
+<div class="tp" id="p-compare">
+<div style="display:flex;gap:24px;margin-bottom:24px;flex-wrap:wrap;">
+  <div style="flex:1;min-width:280px;background:var(--c);border-radius:var(--r);padding:16px;box-shadow:var(--sh);">
+    <h4 style="margin-bottom:8px;color:#2557a7;">期間A</h4>
+    <div style="display:flex;gap:4px;margin-bottom:8px;">
+      <button id="CA_latest" style="padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;background:#2557a7;color:#fff;font-size:12px;cursor:pointer;">最新</button>
+      <button id="CA_all" style="padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#475569;font-size:12px;cursor:pointer;">全選択</button>
+      <button id="CA_none" style="padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#475569;font-size:12px;cursor:pointer;">解除</button>
+    </div>
+    <div id="CAL" style="max-height:200px;overflow-y:auto;"></div>
+  </div>
+  <div style="flex:1;min-width:280px;background:var(--c);border-radius:var(--r);padding:16px;box-shadow:var(--sh);">
+    <h4 style="margin-bottom:8px;color:#ff6b35;">期間B</h4>
+    <div style="display:flex;gap:4px;margin-bottom:8px;">
+      <button id="CB_latest" style="padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;background:#ff6b35;color:#fff;font-size:12px;cursor:pointer;">最新</button>
+      <button id="CB_all" style="padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#475569;font-size:12px;cursor:pointer;">全選択</button>
+      <button id="CB_none" style="padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#475569;font-size:12px;cursor:pointer;">解除</button>
+    </div>
+    <div id="CBL" style="max-height:200px;overflow-y:auto;"></div>
+  </div>
+</div>
+<div class="kg" id="CMP_KPI"></div>
+<div class="cg">
+  <div class="cd fu"><h3>期間比較：全期間推移</h3><div class="cc tl"><canvas id="cCmp"></canvas></div></div>
+</div>
+<div class="cg">
+  <div class="cd fu">
+    <h3>求人別差分</h3>
+    <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <input id="CMP_Q" placeholder="求人名で検索..." style="padding:6px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem;width:250px;">
+      <select id="CMP_SORT" style="padding:6px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem;">
+        <option value="appDiff_d">応募差分（多い順）</option>
+        <option value="appDiff_a">応募差分（少ない順）</option>
+        <option value="ctrDiff_d">CTR変化（大きい順）</option>
+        <option value="ctrDiff_a">CTR変化（小さい順）</option>
+        <option value="cpaDiff_a">CPA変化（改善順）</option>
+        <option value="cpaDiff_d">CPA変化（悪化順）</option>
+      </select>
+    </div>
+    <div class="ts"><table><thead><tr id="CMP_TH"></tr></thead><tbody id="CMP_TB"></tbody></table></div>
+  </div>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -344,6 +390,14 @@ function sm(a,k){var s=0;for(var i=0;i<a.length;i++)s+=(a[i][k]||0);return s}
 function av(a,k){return a.length?sm(a,k)/a.length:0}
 function rkBadge(r){return'<span class="rk rk-'+r+'">'+r+'</span>'}
 
+function eN(name){
+  return(window.companyEmoji&&window.companyEmoji[name]?window.companyEmoji[name]+' ':'')+name;
+}
+function eBig(company){
+  var e=window.companyEmoji&&window.companyEmoji[company]?window.companyEmoji[company]:'';
+  return e?'<span style="font-size:2rem;margin-left:12px">'+e+'</span>':'';
+}
+
 function extractPeriod(fname){
   var m=fname.match(/(\d{8})[_\-](\d{8})/);
   if(!m)return null;
@@ -356,42 +410,32 @@ function calcRanks(data){
   var sp=data.filter(function(d){return d.cost>0&&d.impressions>0});
   var og=data.filter(function(d){return(!d.cost||d.cost<=0)&&d.impressions>0});
   var noImp=data.filter(function(d){return!d.impressions||d.impressions<=0});
-
   function pct(arr,key,inv){
     var vals=arr.map(function(d){return d[key]||0}).sort(function(a,b){return a-b});
     arr.forEach(function(d){
-      var v=d[key]||0;
-      var idx=vals.indexOf(v);
+      var v=d[key]||0;var idx=vals.indexOf(v);
       var p=vals.length>1?idx/(vals.length-1):0.5;
       d['_p_'+key]=inv?1-p:p;
     });
   }
-
   if(sp.length){
-    pct(sp,'ctr',false);
-    pct(sp,'ar',false);
-    pct(sp,'cpa',true);
+    pct(sp,'ctr',false);pct(sp,'ar',false);pct(sp,'cpa',true);
     sp.forEach(function(d){
       d._score=Math.round((d._p_ctr*33+d._p_ar*33+d._p_cpa*34));
       d._rank=d._score>=80?'S':d._score>=60?'A':d._score>=40?'B':d._score>=20?'C':'D';
       d._rankType='sponsor';
     });
   }
-
   if(og.length){
-    pct(og,'ctr',false);
-    pct(og,'ar',false);
-    pct(og,'impressions',false);
+    pct(og,'ctr',false);pct(og,'ar',false);pct(og,'impressions',false);
     og.forEach(function(d){
       d._score=Math.round((d._p_ctr*40+d._p_ar*40+d._p_impressions*20));
       d._rank=d._score>=80?'S':d._score>=60?'A':d._score>=40?'B':d._score>=20?'C':'D';
       d._rankType='organic';
     });
   }
-
   noImp.forEach(function(d){d._score=0;d._rank='D';d._rankType=d.cost>0?'sponsor':'organic';});
 }
-
 
 function parseCSV(text,period){
   if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
@@ -418,8 +462,7 @@ function fetchGAS(){
       var data;try{data=JSON.parse(txt)}catch(e){setStatus('er','パースエラー');resolve(false);return}
       if(data.error){setStatus('er',data.error);resolve(false);return}
       if(!Array.isArray(data)||data.length<2){setStatus('ok','データなし');raw=[];resolve(true);return}
-      var hd=data[0],out=[],piCol=-1,psCol=-1,peCol=-1;
-      for(var j=0;j<hd.length;j++){if(hd[j]==='_period')piCol=j;if(hd[j]==='_periodStart')psCol=j;if(hd[j]==='_periodEnd')peCol=j}
+      var hd=data[0],out=[];
       for(var i=1;i<data.length;i++){
         var row=data[i],o={};
         for(var j=0;j<hd.length;j++){
@@ -493,7 +536,6 @@ function buildCompanyFilter(){
   var html='<div class="mc-acts"><input id="MCS" type="text" placeholder="企業名を検索..." style="width:100%;padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;margin-bottom:8px;box-sizing:border-box;"><button id="MCA">全選択</button><button id="MCN">全解除</button></div>';
   html+='<div id="MCL">';
   cs.forEach(function(c){html+='<label data-name="'+c.toLowerCase()+'"><input type="checkbox" value="'+c+'" checked>'+eN(c)+'</label>'});
-
   html+='</div>';
   document.getElementById('MCD').innerHTML=html;
   document.getElementById('MCS').onclick=function(e){e.stopPropagation()};
@@ -507,15 +549,6 @@ function buildCompanyFilter(){
   document.getElementById('MCN').onclick=function(e){e.stopPropagation();document.querySelectorAll('#MCL input').forEach(function(cb){cb.checked=false});updCoFilter()};
   document.querySelectorAll('#MCL input[type=checkbox]').forEach(function(cb){cb.onchange=updCoFilter});
   updCoFilter();
-}
-
-function eN(name){
-  return (window.companyEmoji&&window.companyEmoji[name]?window.companyEmoji[name]+' ':'')+name;
-}
-
-function eBig(company){
-  var e=window.companyEmoji&&window.companyEmoji[company]?window.companyEmoji[company]:'';
-  return e?'<span style="font-size:2rem;margin-left:12px">'+e+'</span>':'';
 }
 
 var staffMap={};
@@ -551,15 +584,11 @@ function applyStaffFilter(){
   var btn=document.getElementById('STB');
   btn.innerHTML=checked.length===all.length?'すべて <span>▼</span>':checked.length+'名選択中 <span>▼</span>';
   var cos={};
-  checked.forEach(function(name){
-    (staffMap[name]||[]).forEach(function(c){cos[c]=1});
-  });
+  checked.forEach(function(name){(staffMap[name]||[]).forEach(function(c){cos[c]=1})});
   if(checked.length===all.length){
     document.querySelectorAll('#MCL input[type=checkbox]').forEach(function(cb){cb.checked=true});
   }else{
-    document.querySelectorAll('#MCL input[type=checkbox]').forEach(function(cb){
-      cb.checked=!!cos[cb.value];
-    });
+    document.querySelectorAll('#MCL input[type=checkbox]').forEach(function(cb){cb.checked=!!cos[cb.value]});
   }
   updCoFilter();
 }
@@ -574,32 +603,123 @@ function updCoFilter(){
   applyF();
 }
 
-function init(){
-  if(!raw.length){document.getElementById('UA').style.display='';document.getElementById('DB').style.display='none';document.getElementById('DS').classList.remove('on');return}
-  document.getElementById('UA').style.display='none';document.getElementById('DB').style.display='block';document.getElementById('DS').classList.add('on');
-  var co={},pr={};raw.forEach(function(d){co[d.company]=1;pr[d._period||'unknown']=1});
-  document.getElementById('s1').textContent=Object.keys(co).length;
-  document.getElementById('s2').textContent=raw.length;
-  var periods=Object.keys(pr).sort();
-  document.getElementById('s3').textContent=periods.length;
-  buildCompanyFilter();
-  var pOpts='<option value="">最新</option><option value="__all__">すべての期間</option>';
-  periods.forEach(function(p){if(p!=='unknown'){var parts=p.split('_');var label=p;if(parts.length===2&&parts[0].length===8&&parts[1].length===8){var s=parts[0],e=parts[1];label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'')}pOpts+='<option value="'+p+'">'+label+'</option>'}});
-  document.getElementById('FD').innerHTML=pOpts;
-  popFilt();applyF();
+/* ========== 期間フィルタ（複数選択＋合算/週別） ========== */
+var selPeriods={};
+var periodMerge='merge';
+
+function buildPeriodFilter(periods){
+  periods=periods.filter(function(p){return p!=='unknown'}).sort();
+  var latest=periods.length?periods[periods.length-1]:'';
+  selPeriods={};
+  if(latest)selPeriods[latest]=true;
+
+  var html='<div style="display:flex;gap:4px;margin-bottom:8px;">';
+  html+='<button id="PD_latest" style="flex:1;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;background:#2557a7;color:#fff;font-size:12px;cursor:pointer;">最新</button>';
+  html+='<button id="PD_all" style="flex:1;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#475569;font-size:12px;cursor:pointer;">全期間</button>';
+  html+='<button id="PD_none" style="flex:1;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#475569;font-size:12px;cursor:pointer;">全解除</button>';
+  html+='</div>';
+
+  html+='<div style="display:flex;gap:0;margin-bottom:8px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;">';
+  html+='<button class="pd-mode" data-m="merge" style="flex:1;padding:5px 8px;font-size:12px;cursor:pointer;border:none;background:#2557a7;color:#fff;">合算</button>';
+  html+='<button class="pd-mode" data-m="weekly" style="flex:1;padding:5px 8px;font-size:12px;cursor:pointer;border:none;background:#fff;color:#475569;">週別</button>';
+  html+='</div>';
+
+  html+='<div id="PDL">';
+  periods.forEach(function(p){
+    var parts=p.split('_');var label=p;
+    if(parts.length===2&&parts[0].length===8&&parts[1].length===8){
+      var s=parts[0],e=parts[1];
+      label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'');
+    }
+    var ck=selPeriods[p]?' checked':'';
+    html+='<label style="display:block;padding:3px 4px;font-size:13px;cursor:pointer;"><input type="checkbox" value="'+p+'"'+ck+'> '+label+'</label>';
+  });
+  html+='</div>';
+  document.getElementById('PDD').innerHTML=html;
+
+  document.getElementById('PD_latest').onclick=function(e){
+    e.stopPropagation();
+    selPeriods={};if(latest)selPeriods[latest]=true;
+    document.querySelectorAll('#PDL input').forEach(function(cb){cb.checked=!!selPeriods[cb.value]});
+    updPeriodLabel();applyF();
+  };
+  document.getElementById('PD_all').onclick=function(e){
+    e.stopPropagation();
+    selPeriods={};document.querySelectorAll('#PDL input').forEach(function(cb){cb.checked=true;selPeriods[cb.value]=true});
+    updPeriodLabel();applyF();
+  };
+  document.getElementById('PD_none').onclick=function(e){
+    e.stopPropagation();
+    selPeriods={};document.querySelectorAll('#PDL input').forEach(function(cb){cb.checked=false});
+    updPeriodLabel();applyF();
+  };
+  document.querySelectorAll('.pd-mode').forEach(function(b){
+    b.onclick=function(e){
+      e.stopPropagation();
+      periodMerge=this.getAttribute('data-m');
+      document.querySelectorAll('.pd-mode').forEach(function(x){
+        x.style.background=x.getAttribute('data-m')===periodMerge?'#2557a7':'#fff';
+        x.style.color=x.getAttribute('data-m')===periodMerge?'#fff':'#475569';
+      });
+      applyF();
+    };
+  });
+  document.querySelectorAll('#PDL input').forEach(function(cb){
+    cb.onchange=function(){
+      if(this.checked)selPeriods[this.value]=true;else delete selPeriods[this.value];
+      updPeriodLabel();applyF();
+    };
+  });
+
+  document.getElementById('PDB').onclick=function(e){
+    e.stopPropagation();
+    var dd=document.getElementById('PDD');
+    dd.style.display=dd.style.display==='block'?'none':'block';
+  };
+  document.addEventListener('click',function(e){
+    if(!document.getElementById('PDW').contains(e.target)){
+      document.getElementById('PDD').style.display='none';
+    }
+  });
+
+  updPeriodLabel();
 }
-function popFilt(){
-  var pr={};raw.forEach(function(d){pr[d.prefecture]=1});
-  document.getElementById('FP').innerHTML='<option value="">すべて</option>'+Object.keys(pr).sort().map(function(p){return'<option value="'+p+'">'+p+'</option>'}).join('');
+
+function updPeriodLabel(){
+  var keys=Object.keys(selPeriods);
+  var btn=document.getElementById('PDB');
+  if(keys.length===0){btn.innerHTML='未選択 <span>▼</span>';}
+  else if(keys.length===1){
+    var p=keys[0],parts=p.split('_'),label=p;
+    if(parts.length===2&&parts[0].length===8&&parts[1].length===8){
+      var s=parts[0],e=parts[1];
+      label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'');
+    }
+    btn.innerHTML=label+' <span>▼</span>';
+  }else{
+    btn.innerHTML=keys.length+'期間選択中 <span>▼</span>';
+  }
 }
-['FP','FS','FD'].forEach(function(id){document.getElementById(id).onchange=applyF});
+
+/* フィルタ共通 */
+['FP','FS'].forEach(function(id){document.getElementById(id).onchange=applyF});
 document.getElementById('FK').oninput=applyF;
-document.getElementById('FR').onclick=function(){['FP','FS','FD'].forEach(function(id){document.getElementById(id).value=''});document.getElementById('FK').value='';document.querySelectorAll('#MCD input').forEach(function(cb){cb.checked=true});
-spMode='all';
-document.querySelectorAll('.spBtn').forEach(function(b){
- b.classList.toggle('active',b.getAttribute('data-sp')==='all');
-});
-updCoFilter()};
+
+document.getElementById('FR').onclick=function(){
+  ['FP','FS'].forEach(function(id){document.getElementById(id).value=''});
+  document.getElementById('FK').value='';
+  document.querySelectorAll('#MCD input').forEach(function(cb){cb.checked=true});
+  spMode='all';
+  document.querySelectorAll('.spBtn').forEach(function(b){
+    b.classList.toggle('active',b.getAttribute('data-sp')==='all');
+  });
+  // 期間を最新に戻す
+  selPeriods={};
+  var allP=[];document.querySelectorAll('#PDL input').forEach(function(cb){allP.push(cb.value);cb.checked=false;});
+  if(allP.length){var latest=allP.sort().pop();selPeriods[latest]=true;document.querySelectorAll('#PDL input').forEach(function(cb){cb.checked=cb.value===latest;});}
+  updPeriodLabel();
+  updCoFilter();
+};
 
 var spMode='all';
 function setSP(mode){
@@ -611,23 +731,73 @@ function setSP(mode){
 }
 
 function applyF(){
-  var pr=document.getElementById('FP').value,st=document.getElementById('FS').value,pd=document.getElementById('FD').value,kw=document.getElementById('FK').value.toLowerCase();
+  var pr=document.getElementById('FP').value,st=document.getElementById('FS').value,kw=document.getElementById('FK').value.toLowerCase();
   var coAll=Object.keys(selCo).length===0;
-  var latestPeriod='';
-  if(!pd){var ps={};raw.forEach(function(d){if(d._period)ps[d._period]=1});var pArr=Object.keys(ps).sort();if(pArr.length)latestPeriod=pArr[pArr.length-1]}
+  var hasPeriods=Object.keys(selPeriods).length>0;
+
   flt=raw.filter(function(d){
     if(!coAll&&!selCo[d.company])return false;
     if(pr&&d.prefecture!==pr)return false;
     if(st&&d.status!==st)return false;
-    if(pd==='__all__'){}
-    else if(pd&&d._period!==pd)return false;
-    else if(!pd&&latestPeriod&&d._period!==latestPeriod)return false;
+    if(hasPeriods&&!selPeriods[d._period])return false;
+    if(!hasPeriods)return false; // 未選択なら何も表示しない
     if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;
-    if(spMode==='sponsor' && (!d.cost || d.cost<=0)) return false;
-    if(spMode==='organic' && d.cost>0) return false;
+    if(spMode==='sponsor'&&(!d.cost||d.cost<=0))return false;
+    if(spMode==='organic'&&d.cost>0)return false;
     return true;
   });
+
+  // 合算モード：同じrefIdを1行にまとめる
+  if(periodMerge==='merge'&&Object.keys(selPeriods).length>1){
+    var merged={};
+    flt.forEach(function(d){
+      var key=d.refId||d.title;
+      if(!merged[key]){
+        merged[key]=Object.assign({},d);
+        merged[key]._mergeCount=1;
+      }else{
+        var m=merged[key];
+        NK.forEach(function(k){
+          if(k==='ctr'||k==='asr'||k==='ar'||k==='completionRate'||k==='cpc'||k==='cpas'||k==='cpa')return;
+          m[k]=(m[k]||0)+(d[k]||0);
+        });
+        m._mergeCount++;
+      }
+    });
+    flt=Object.keys(merged).map(function(k){
+      var m=merged[k];
+      m.ctr=m.impressions?m.clicks/m.impressions:0;
+      m.asr=m.clicks?m.appStarts/m.clicks:0;
+      m.completionRate=m.appStarts?m.applications/m.appStarts:0;
+      m.ar=m.impressions?m.applications/m.impressions:0;
+      m.cpc=m.clicks?m.cost/m.clicks:0;
+      m.cpas=m.appStarts?m.cost/m.appStarts:0;
+      m.cpa=m.applications?m.cost/m.applications:0;
+      m._period=Object.keys(selPeriods).sort().join(', ');
+      return m;
+    });
+  }
+
   calcRanks(flt);pg=1;pfRank='ALL';renderAll();
+}
+
+function init(){
+  if(!raw.length){document.getElementById('UA').style.display='';document.getElementById('DB').style.display='none';document.getElementById('DS').classList.remove('on');return}
+  document.getElementById('UA').style.display='none';document.getElementById('DB').style.display='block';document.getElementById('DS').classList.add('on');
+  var co={},pr={};raw.forEach(function(d){co[d.company]=1;pr[d._period||'unknown']=1});
+  document.getElementById('s1').textContent=Object.keys(co).length;
+  document.getElementById('s2').textContent=raw.length;
+  var periods=Object.keys(pr).sort();
+  document.getElementById('s3').textContent=periods.length;
+  buildCompanyFilter();
+  buildPeriodFilter(periods);
+  buildCompareSelectors();
+  popFilt();applyF();
+}
+
+function popFilt(){
+  var pr={};raw.forEach(function(d){pr[d.prefecture]=1});
+  document.getElementById('FP').innerHTML='<option value="">すべて</option>'+Object.keys(pr).sort().map(function(p){return'<option value="'+p+'">'+p+'</option>'}).join('');
 }
 
 document.querySelectorAll('.tt').forEach(function(t){t.onclick=function(){
@@ -637,7 +807,7 @@ document.querySelectorAll('.tt').forEach(function(t){t.onclick=function(){
   setTimeout(renderAll,50);
 }});
 
-function renderAll(){rKPI();rOv();rRank();rFun();rCost();rComp();rReg();rTab();rTrend();rPerf();rAnalysis()}
+function renderAll(){rKPI();rOv();rRank();rFun();rCost();rComp();rReg();rTab();rTrend();rPerf();rAnalysis();rCompare()}
 
 function rKPI(){
   var d=flt,tI=sm(d,'impressions'),tC=sm(d,'clicks'),tAS=sm(d,'appStarts'),tA=sm(d,'applications'),tCo=sm(d,'cost');
@@ -677,7 +847,7 @@ function rRank(){
   var isPct=PCT.indexOf(k)!==-1;
   sl.forEach(function(d){d._v=isPct?d[k]*100:d[k]});
   dx('rank');ch.rank=new Chart(document.getElementById('c4'),{type:'bar',data:{labels:sl.map(function(d){return sT(d.title,30)}),datasets:[{data:sl.map(function(d){return d._v}),backgroundColor:sl.map(function(_,i){return CL[i%CL.length]})}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{beginAtZero:true}}}});
-    document.getElementById('RK').innerHTML=sl.map(function(d,i){var link=d.url?'<a href="'+d.url+'" target="_blank" style="color:var(--p);text-decoration:underline">'+sT(d.title,60)+'</a>':sT(d.title,60);return'<li class="ri"><div class="rn">'+(i+1)+'</div><div class="rf"><div class="rm"><span style="display:inline-block;min-width:400px;vertical-align:middle">'+link+'</span>'+eBig(d.company)+' '+rkBadge(d._rank||'D')+'</div><div class="rd">'+(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="rd">表示:'+fmt(d.impressions)+' クリック:'+fmt(d.clicks)+' 応募:'+fmt(d.applications)+' 費用:'+fY(d.cost)+'</div></div><div class="rv">'+fV(k,d[k])+'</div></li>'}).join('');
+  document.getElementById('RK').innerHTML=sl.map(function(d,i){var link=d.url?'<a href="'+d.url+'" target="_blank" style="color:var(--p);text-decoration:underline">'+sT(d.title,60)+'</a>':sT(d.title,60);return'<li class="ri" style="position:relative"><div class="rn">'+(i+1)+'</div><div class="rf"><div class="rm"><span style="display:inline-block;min-width:400px;vertical-align:middle">'+link+'</span>'+eBig(d.company)+' '+rkBadge(d._rank||'D')+'</div><div class="rd">'+(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="rd">表示:'+fmt(d.impressions)+' クリック:'+fmt(d.clicks)+' 応募:'+fmt(d.applications)+' 費用:'+fY(d.cost)+'</div></div><div class="rv">'+fV(k,d[k])+'</div></li>'}).join('');
 }
 
 function rFun(){
@@ -733,43 +903,32 @@ var TC2=[{k:'_rank',l:'ランク',t:'r'},{k:'title',l:'求人',t:'x'},{k:'compan
 function rTab(){
   var q=(document.getElementById('TI').value||'').toLowerCase(),data=flt;
   if(q)data=data.filter(function(d){var vals=Object.values(d);for(var i=0;i<vals.length;i++){if(String(vals[i]).toLowerCase().indexOf(q)!==-1)return true}return false});
-
- // 絞り込み条件を適用
-var nfRows=document.querySelectorAll('#NFL .nf-row');
-nfRows.forEach(function(row){
-  var key=row.querySelector('.nf-key').value;
-  var op=row.querySelector('.nf-op').value;
-  var val=parseFloat(row.querySelector('.nf-val').value);
-  if(!key||isNaN(val))return;
-  data=data.filter(function(d){
-    var dv=parseFloat(d[key])||0;
-    // %系指標は0〜1で格納されているので100倍して比較
-    if(key==='ctr'||key==='asr'||key==='ar'||key==='completionRate') dv=dv*100;
-    return op==='gte'?dv>=val:dv<=val;
+  var nfRows=document.querySelectorAll('#NFL .nf-row');
+  nfRows.forEach(function(row){
+    var key=row.querySelector('.nf-key').value;
+    var op=row.querySelector('.nf-op').value;
+    var val=parseFloat(row.querySelector('.nf-val').value);
+    if(!key||isNaN(val))return;
+    data=data.filter(function(d){
+      var dv=parseFloat(d[key])||0;
+      if(key==='ctr'||key==='asr'||key==='ar'||key==='completionRate')dv=dv*100;
+      return op==='gte'?dv>=val:dv<=val;
+    });
   });
-});
-
   if(srt.c){var sc=srt.c,sa=srt.a;data=data.slice().sort(function(a,b){var va=a[sc],vb=b[sc];if(typeof va==='number'&&typeof vb==='number')return sa?va-vb:vb-va;return sa?String(va||'').localeCompare(String(vb||'')):String(vb||'').localeCompare(String(va||''))})}
   document.getElementById('TH').innerHTML=TC2.map(function(c){var s=srt.c===c.k;return'<th data-c="'+c.k+'">'+c.l+'<span style="margin-left:4px;opacity:'+(s?'1':'.5')+'">'+(s?(srt.a?'▲':'▼'):'⇅')+'</span></th>'}).join('');
-   var tp=Math.ceil(data.length/PG),st=(pg-1)*PG,pd=data.slice(st,st+PG);
+  var tp=Math.ceil(data.length/PG),st=(pg-1)*PG,pd=data.slice(st,st+PG);
   document.getElementById('TB').innerHTML=pd.map(function(row){return'<tr>'+TC2.map(function(c){var v=row[c.k];if(c.t==='r')return'<td>'+rkBadge(v||'D')+'</td>';if(c.t==='s')return'<td><span class="sb '+(v==='募集中'?'sa':'se')+'">'+(v||'')+'</span></td>';if(c.t==='p')return'<td class="tr">'+fP(v)+'</td>';if(c.t==='y')return'<td class="tr">'+(v?fY(v):'-')+'</td>';if(c.t==='n')return'<td class="tr">'+fmt(v)+'</td>';if(c.k==='title'){var txt=sT(v,40);return row.url?'<td title="'+(v||'')+'"><a href="'+row.url+'" target="_blank" style="color:var(--p);text-decoration:underline">'+txt+'</a></td>':'<td title="'+(v||'')+'">'+txt+'</td>'}if(c.k==='company')return'<td>'+eN(v)+'</td>';return'<td>'+(v||'')+'</td>'}).join('')+'</tr>'}).join('');
   var pe=document.getElementById('PG');if(tp<=1){pe.innerHTML='';return}
   var h='<button '+(pg<=1?'disabled':'')+' data-p="'+(pg-1)+'">←前</button>';
   for(var i=1;i<=tp;i++){if(tp>10&&Math.abs(i-pg)>3&&i!==1&&i!==tp){if(i===pg-4||i===pg+4)h+='<span>…</span>';continue}h+='<button class="'+(i===pg?'on':'')+'" data-p="'+i+'">'+i+'</button>'}
   h+='<button '+(pg>=tp?'disabled':'')+' data-p="'+(pg+1)+'">次→</button>';pe.innerHTML=h;
 }
-// 絞り込みパネル
+
 var nfOpts=[
-  {k:'cpa',l:'応募単価（CPA）',u:'円'},
-  {k:'cpc',l:'クリック単価（CPC）',u:'円'},
-  {k:'cost',l:'費用合計',u:'円'},
-  {k:'ctr',l:'CTR',u:'%'},
-  {k:'asr',l:'応募率（ASR）',u:'%'},
-  {k:'ar',l:'応募完了率（AR）',u:'%'},
-  {k:'impressions',l:'表示回数',u:'件'},
-  {k:'clicks',l:'クリック数',u:'件'},
-  {k:'apply_starts',l:'応募開始数',u:'件'},
-  {k:'applications',l:'応募数',u:'件'}
+  {k:'cpa',l:'応募単価（CPA）',u:'円'},{k:'cpc',l:'クリック単価（CPC）',u:'円'},{k:'cost',l:'費用合計',u:'円'},
+  {k:'ctr',l:'CTR',u:'%'},{k:'asr',l:'応募率（ASR）',u:'%'},{k:'ar',l:'応募完了率（AR）',u:'%'},
+  {k:'impressions',l:'表示回数',u:'件'},{k:'clicks',l:'クリック数',u:'件'},{k:'apply_starts',l:'応募開始数',u:'件'},{k:'applications',l:'応募数',u:'件'}
 ];
 document.getElementById('NF').onclick=function(){
   var p=document.getElementById('NFP');
@@ -777,29 +936,24 @@ document.getElementById('NF').onclick=function(){
   this.innerHTML=p.style.display==='none'?'絞り込み ▼':'絞り込み ▲';
 };
 function addNFRow(){
-  var div=document.createElement('div');
-  div.className='nf-row';
+  var div=document.createElement('div');div.className='nf-row';
   div.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;';
   var sel='<select class="nf-key" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem;"><option value="">指標を選択</option>';
-  nfOpts.forEach(function(o){sel+='<option value="'+o.k+'">'+o.l+'</option>'});
-  sel+='</select>';
+  nfOpts.forEach(function(o){sel+='<option value="'+o.k+'">'+o.l+'</option>'});sel+='</select>';
   div.innerHTML=sel+
     '<select class="nf-op" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem;"><option value="gte">以上</option><option value="lte">以下</option></select>'+
     '<input class="nf-val" type="number" placeholder="数値" style="width:100px;padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem;">'+
     '<span class="nf-unit" style="font-size:.85rem;color:#64748b;"></span>'+
     '<button onclick="this.parentElement.remove();pg=1;rTab();" style="background:none;border:none;color:#dc2626;font-size:1.1rem;cursor:pointer;padding:4px 8px;">✕</button>';
   div.querySelector('.nf-key').onchange=function(){
-    var u='';var k=this.value;
-    nfOpts.forEach(function(o){if(o.k===k)u=o.u});
-    div.querySelector('.nf-unit').textContent=u;
-    pg=1;rTab();
+    var u='';var k=this.value;nfOpts.forEach(function(o){if(o.k===k)u=o.u});
+    div.querySelector('.nf-unit').textContent=u;pg=1;rTab();
   };
   div.querySelector('.nf-op').onchange=function(){pg=1;rTab()};
   div.querySelector('.nf-val').oninput=function(){pg=1;rTab()};
   document.getElementById('NFL').appendChild(div);
 }
 document.getElementById('NFA').onclick=addNFRow;
-
 document.getElementById('TH').onclick=function(e){var th=e.target.closest('th');if(!th)return;var c=th.getAttribute('data-c');if(srt.c===c)srt.a=!srt.a;else{srt.c=c;srt.a=true}rTab()};
 document.getElementById('TI').oninput=function(){pg=1;rTab()};
 document.getElementById('PG').onclick=function(e){var b=e.target.closest('button');if(!b||b.disabled)return;pg=parseInt(b.getAttribute('data-p'));rTab()};
@@ -807,7 +961,17 @@ document.getElementById('PG').onclick=function(e){var b=e.target.closest('button
 /* 推移タブ */
 document.getElementById('TM').onchange=rTrend;
 function rTrend(){
-  var coAll=Object.keys(selCo).length===0;var pr=document.getElementById('FP').value;var st=document.getElementById('FS').value;var kw=document.getElementById('FK').value.toLowerCase();var src=raw.filter(function(d){if(!coAll&&!selCo[d.company])return false;if(pr&&d.prefecture!==pr)return false;if(st&&d.status!==st)return false;if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;if(spMode==='sponsor'&&(!d.cost||d.cost<=0))return false;if(spMode==='organic'&&d.cost>0)return false;return true});var periods={};src.forEach(function(d){if(d._period&&d._period!=='unknown'){if(!periods[d._period])periods[d._period]={key:d._period,start:d._periodStart,end:d._periodEnd,rows:[]};periods[d._period].rows.push(d)}});
+  var coAll=Object.keys(selCo).length===0;var pr=document.getElementById('FP').value;var st=document.getElementById('FS').value;var kw=document.getElementById('FK').value.toLowerCase();
+  var src=raw.filter(function(d){
+    if(!coAll&&!selCo[d.company])return false;
+    if(pr&&d.prefecture!==pr)return false;
+    if(st&&d.status!==st)return false;
+    if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;
+    if(spMode==='sponsor'&&(!d.cost||d.cost<=0))return false;
+    if(spMode==='organic'&&d.cost>0)return false;
+    return true;
+  });
+  var periods={};src.forEach(function(d){if(d._period&&d._period!=='unknown'){if(!periods[d._period])periods[d._period]={key:d._period,start:d._periodStart,end:d._periodEnd,rows:[]};periods[d._period].rows.push(d)}});
   var pArr=Object.keys(periods).sort().map(function(k){return periods[k]});
   if(pArr.length<2){
     dx('trend');
@@ -815,31 +979,24 @@ function rTrend(){
     document.getElementById('TWC').innerHTML='<div style="padding:24px;text-align:center;color:var(--t2)">2週間以上のデータをアップロードすると推移が表示されます</div>';
     return;
   }
-  var mk=document.getElementById('TM').value;
-  var isPct=PCT.indexOf(mk)!==-1;
+  var mk=document.getElementById('TM').value;var isPct=PCT.indexOf(mk)!==-1;
   var labels=[],vals=[];
   pArr.forEach(function(p){
-    var label=p.key;var parts=label.split('_');if(parts.length===2&&parts[0].length===8&&parts[1].length===8){var s=parts[0],e=parts[1];label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'')}labels.push(label);
-    if(isPct||mk==='cpa'){vals.push(av(p.rows,mk))}
-    else{vals.push(sm(p.rows,mk))}
+    var label=p.key;var parts=label.split('_');
+    if(parts.length===2&&parts[0].length===8&&parts[1].length===8){var s=parts[0],e=parts[1];label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'')}
+    labels.push(label);
+    if(isPct||mk==='cpa'){vals.push(av(p.rows,mk))}else{vals.push(sm(p.rows,mk))}
   });
   document.getElementById('TRT').textContent='週次推移：'+document.getElementById('TM').selectedOptions[0].text;
   var chartData=isPct?vals.map(function(v){return v*100}):vals;
   dx('trend');ch.trend=new Chart(document.getElementById('c19'),{type:'line',data:{labels:labels,datasets:[{label:document.getElementById('TM').selectedOptions[0].text,data:chartData,borderColor:'#2557a7',backgroundColor:'#2557a788',fill:true,tension:.3,pointRadius:6,pointBackgroundColor:'#2557a7'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false}},scales:{y:{beginAtZero:true}}}});
-  /* 前週比 */
   if(pArr.length>=2){
     var cur=pArr[pArr.length-1],prev=pArr[pArr.length-2];
     var curMap={},prevMap={};
-    cur.rows.forEach(function(d){curMap[d.refId]=d});
-    prev.rows.forEach(function(d){prevMap[d.refId]=d});
+    cur.rows.forEach(function(d){curMap[d.refId]=d});prev.rows.forEach(function(d){prevMap[d.refId]=d});
     var changes=[];
     Object.keys(curMap).forEach(function(id){
-      if(prevMap[id]){
-        var c=curMap[id],p=prevMap[id];
-        var diff=c.applications-p.applications;
-        var ctrDiff=c.ctr-p.ctr;
-        changes.push({title:c.title,url:c.url,company:c.company,appDiff:diff,ctrDiff:ctrDiff,curApp:c.applications,prevApp:p.applications});
-      }
+      if(prevMap[id]){var c=curMap[id],p=prevMap[id];changes.push({title:c.title,url:c.url,company:c.company,appDiff:c.applications-p.applications,ctrDiff:c.ctr-p.ctr,curApp:c.applications,prevApp:p.applications})}
     });
     changes.sort(function(a,b){return b.appDiff-a.appDiff});
     function shortLabel(k){var parts=k.split('_');if(parts.length===2&&parts[0].length===8&&parts[1].length===8){var s=parts[0],e=parts[1];return s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'')}return k}
@@ -868,7 +1025,7 @@ function rPerf(){
   show=show.slice().sort(function(a,b){return(b._score||0)-(a._score||0)});
   document.getElementById('PL').innerHTML=show.map(function(d){
     var titleHtml=d.url?'<a href="'+d.url+'" target="_blank">'+sT(d.title,50)+'</a>':sT(d.title,50);
-        return'<div class="pc"><div class="pc-r '+(d._rank||'D')+'">'+(d._rank||'D')+'</div><div class="pc-i"><div class="pc-t"><span style="display:inline-block;min-width:350px;vertical-align:middle">'+titleHtml+'</span>'+eBig(d.company)+'</div><div class="pc-d">'+eN(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="pc-m"><span>スコア: '+(d._score||0)+'/100</span><span>CTR: '+fP(d.ctr)+'</span><span>AR: '+fP(d.ar)+'</span><span>CPA: '+(d.cpa?fY(d.cpa):'-')+'</span><span>応募: '+fmt(d.applications)+'</span><span>費用: '+fY(d.cost)+'</span></div></div></div>'
+    return'<div class="pc"><div class="pc-r '+(d._rank||'D')+'">'+(d._rank||'D')+'</div><div class="pc-i"><div class="pc-t"><span style="display:inline-block;min-width:350px;vertical-align:middle">'+titleHtml+'</span>'+eBig(d.company)+'</div><div class="pc-d">'+eN(d.company||'')+' | '+(d.prefecture||'')+' '+(d.city||'')+' | '+(d.status||'')+'</div><div class="pc-m"><span>スコア: '+(d._score||0)+'/100</span><span>CTR: '+fP(d.ctr)+'</span><span>AR: '+fP(d.ar)+'</span><span>CPA: '+(d.cpa?fY(d.cpa):'-')+'</span><span>応募: '+fmt(d.applications)+'</span><span>費用: '+fY(d.cost)+'</span></div></div></div>';
   }).join('')||'<div style="padding:24px;text-align:center;color:var(--t2)">該当なし</div>';
 }
 
@@ -879,45 +1036,37 @@ function rAnalysis(){
   var d=flt,tI=sm(d,'impressions'),tC=sm(d,'clicks'),tA=sm(d,'applications'),tCo=sm(d,'cost');
   var avgCtr=av(d,'ctr'),avgAr=av(d,'ar'),avgCpa=d.filter(function(x){return x.cpa>0});
   var mCpa=avgCpa.length?avgCpa.reduce(function(s,x){return s+x.cpa},0)/avgCpa.length:0;
-  /* 全体サマリー */
   insights.push({t:'n',m:'全'+d.length+'求人の概要：合計表示 '+fmt(tI)+'回、合計応募 '+fmt(tA)+'件、合計費用 '+fY(tCo)+'。全体CTR '+fP(avgCtr)+'、全体AR '+fP(av(d,'ar'))+'、平均CPA '+fY(mCpa)});
-  /* Sランク分析 */
   var sRank=d.filter(function(x){return x._rank==='S'});
   if(sRank.length){
     var sCtr=av(sRank,'ctr'),sAr=av(sRank,'ar'),sCpa=sRank.filter(function(x){return x.cpa>0});
     var sMcpa=sCpa.length?sCpa.reduce(function(s,x){return s+x.cpa},0)/sCpa.length:0;
     insights.push({t:'g',m:'Sランク（'+sRank.length+'件）の共通特徴：平均CTR '+fP(sCtr)+'、平均AR '+fP(sAr)+'、平均CPA '+fY(sMcpa)+'。これらの求人が最もコスパが良い求人です。'});
   }
-  /* Dランク分析 */
   var dRank=d.filter(function(x){return x._rank==='D'});
   if(dRank.length){
     var noApp=dRank.filter(function(x){return x.applications===0});
     insights.push({t:'d',m:'Dランク（'+dRank.length+'件）のうち'+noApp.length+'件が応募0件です。掲載内容の見直し、タイトルや条件の改善を推奨します。'});
   }
-  /* CTR高いがAR低い */
   var highCtrLowAr=d.filter(function(x){return x.ctr>avgCtr*1.5&&x.ar<av(d,'ar')*0.5&&x.impressions>100});
   if(highCtrLowAr.length){
     insights.push({t:'w',m:'CTRは高いがARが低い求人が'+highCtrLowAr.length+'件あります（タイトルは魅力的だが応募に至らない）。応募フォームや求人内容の改善で効果が見込めます。該当：'+highCtrLowAr.slice(0,3).map(function(x){return sT(x.title,30)}).join('、')});
   }
-  /* CTR低い */
   var lowCtr=d.filter(function(x){return x.ctr<avgCtr*0.5&&x.impressions>500});
   if(lowCtr.length){
     insights.push({t:'w',m:'表示回数は多いがCTRが平均の半分以下の求人が'+lowCtr.length+'件あります。タイトルや表示条件の見直しを推奨。該当：'+lowCtr.slice(0,3).map(function(x){return sT(x.title,30)}).join('、')});
   }
-  /* CPA高い */
   if(mCpa>0){
     var highCpa=d.filter(function(x){return x.cpa>mCpa*2&&x.cpa>0});
     if(highCpa.length){
       insights.push({t:'d',m:'CPAが平均の2倍以上の求人が'+highCpa.length+'件あります。費用対効果が悪いため、入札額の調整や掲載内容の見直しを検討してください。該当：'+highCpa.slice(0,3).map(function(x){return sT(x.title,30)+'('+fY(x.cpa)+')'}).join('、')});
     }
   }
-  /* 地域分析 */
   var rg={};d.forEach(function(x){if(!rg[x.prefecture])rg[x.prefecture]=[];rg[x.prefecture].push(x)});
   var rgArr=Object.keys(rg).map(function(n){var it=rg[n],wp=it.filter(function(x){return x.cpa>0});return{n:n,cnt:it.length,avgCpa:wp.length?wp.reduce(function(s,x){return s+x.cpa},0)/wp.length:0}}).filter(function(r){return r.avgCpa>0}).sort(function(a,b){return a.avgCpa-b.avgCpa});
   if(rgArr.length>=2){
     insights.push({t:'n',m:'地域別CPA：最もコスパが良いのは「'+rgArr[0].n+'」(平均CPA '+fY(rgArr[0].avgCpa)+')、最も高いのは「'+rgArr[rgArr.length-1].n+'」(平均CPA '+fY(rgArr[rgArr.length-1].avgCpa)+')です。'});
   }
-  /* 企業分析 */
   var cg={};d.forEach(function(x){if(!cg[x.company])cg[x.company]=[];cg[x.company].push(x)});
   var cgArr=Object.keys(cg).map(function(n){var it=cg[n];return{n:n,sRate:it.filter(function(x){return x._rank==='S'||x._rank==='A'}).length/it.length}}).sort(function(a,b){return b.sRate-a.sRate});
   if(cgArr.length>=2){
@@ -926,6 +1075,289 @@ function rAnalysis(){
   }
   var typeMap={g:'ai-g',w:'ai-w2',d:'ai-d',n:'ai-n'};
   document.getElementById('AI').innerHTML=insights.map(function(ins){return'<div class="ai-i '+typeMap[ins.t]+'">'+ins.m+'</div>'}).join('');
+}
+
+/* ========== 期間比較タブ ========== */
+var cmpA={},cmpB={},cmpBuilt=false;
+
+function buildCompareSelectors(){
+  var ps={};raw.forEach(function(d){if(d._period&&d._period!=='unknown')ps[d._period]=1});
+  var periods=Object.keys(ps).sort();
+  var latest=periods.length?periods[periods.length-1]:'';
+  var prev=periods.length>1?periods[periods.length-2]:'';
+
+  if(!cmpBuilt){
+    cmpA={};cmpB={};
+    if(prev)cmpA[prev]=true;
+    if(latest)cmpB[latest]=true;
+    cmpBuilt=true;
+  }
+
+  function buildList(containerId,sel){
+    var html='';
+    periods.forEach(function(p){
+      var parts=p.split('_');var label=p;
+      if(parts.length===2&&parts[0].length===8&&parts[1].length===8){
+        var s=parts[0],e=parts[1];
+        label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'');
+      }
+      var ck=sel[p]?' checked':'';
+      html+='<label style="display:block;padding:3px 4px;font-size:13px;cursor:pointer;"><input type="checkbox" value="'+p+'"'+ck+'> '+label+'</label>';
+    });
+    document.getElementById(containerId).innerHTML=html;
+    document.querySelectorAll('#'+containerId+' input').forEach(function(cb){
+      cb.onchange=function(){
+        if(this.checked)sel[this.value]=true;else delete sel[this.value];
+        rCompare();
+      };
+    });
+  }
+
+  buildList('CAL',cmpA);
+  buildList('CBL',cmpB);
+
+  // ボタンはcloneで既存リスナーを除去してから再登録
+  function rebind(id,fn){
+    var old=document.getElementById(id);
+    var nw=old.cloneNode(true);
+    old.parentNode.replaceChild(nw,old);
+    nw.onclick=fn;
+  }
+
+  rebind('CA_latest',function(){
+    cmpA={};if(prev)cmpA[prev]=true;
+    document.querySelectorAll('#CAL input').forEach(function(cb){cb.checked=!!cmpA[cb.value]});
+    rCompare();
+  });
+  rebind('CA_all',function(){
+    cmpA={};document.querySelectorAll('#CAL input').forEach(function(cb){cb.checked=true;cmpA[cb.value]=true});
+    rCompare();
+  });
+  rebind('CA_none',function(){
+    cmpA={};document.querySelectorAll('#CAL input').forEach(function(cb){cb.checked=false});
+    rCompare();
+  });
+  rebind('CB_latest',function(){
+    cmpB={};if(latest)cmpB[latest]=true;
+    document.querySelectorAll('#CBL input').forEach(function(cb){cb.checked=!!cmpB[cb.value]});
+    rCompare();
+  });
+  rebind('CB_all',function(){
+    cmpB={};document.querySelectorAll('#CBL input').forEach(function(cb){cb.checked=true;cmpB[cb.value]=true});
+    rCompare();
+  });
+  rebind('CB_none',function(){
+    cmpB={};document.querySelectorAll('#CBL input').forEach(function(cb){cb.checked=false});
+    rCompare();
+  });
+
+  // 検索・ソートも同様にrebind
+  rebind('CMP_Q',null);
+  document.getElementById('CMP_Q').oninput=rCompare;
+  rebind('CMP_SORT',null);
+  document.getElementById('CMP_SORT').onchange=rCompare;
+}
+
+function mergeRows(rows){
+  var merged={};
+  rows.forEach(function(d){
+    var key=d.refId||d.title;
+    if(!merged[key]){merged[key]=Object.assign({},d);merged[key]._mc=1;}
+    else{
+      var m=merged[key];
+      NK.forEach(function(k){
+        if(k==='ctr'||k==='asr'||k==='ar'||k==='completionRate'||k==='cpc'||k==='cpas'||k==='cpa')return;
+        m[k]=(m[k]||0)+(d[k]||0);
+      });
+      m._mc++;
+    }
+  });
+  return Object.keys(merged).map(function(k){
+    var m=merged[k];
+    m.ctr=m.impressions?m.clicks/m.impressions:0;
+    m.asr=m.clicks?m.appStarts/m.clicks:0;
+    m.completionRate=m.appStarts?m.applications/m.appStarts:0;
+    m.ar=m.impressions?m.applications/m.impressions:0;
+    m.cpc=m.clicks?m.cost/m.clicks:0;
+    m.cpas=m.appStarts?m.cost/m.appStarts:0;
+    m.cpa=m.applications?m.cost/m.applications:0;
+    return m;
+  });
+}
+
+function cmpDiffHtml(a,b,isPct,isCost){
+  var diff=b-a;
+  if(isPct){
+    var dp=(diff*100).toFixed(2);
+    var col=diff>0?'var(--s)':diff<0?'var(--d)':'var(--t2)';
+    return'<span style="color:'+col+';font-weight:600">'+(diff>0?'+':'')+dp+'%</span>';
+  }
+  if(isCost){
+    // CPAは下がると改善
+    var col=diff<0?'var(--s)':diff>0?'var(--d)':'var(--t2)';
+    return'<span style="color:'+col+';font-weight:600">'+(diff>0?'+':'')+fY(diff)+'</span>';
+  }
+  var col=diff>0?'var(--s)':diff<0?'var(--d)':'var(--t2)';
+  return'<span style="color:'+col+';font-weight:600">'+(diff>0?'+':'')+fmt(diff)+'</span>';
+}
+
+function rCompare(){
+  var aKeys=Object.keys(cmpA),bKeys=Object.keys(cmpB);
+
+  // フィルタ適用（企業等）
+  var coAll=Object.keys(selCo).length===0;
+  var baseFilter=function(d){
+    if(!coAll&&!selCo[d.company])return false;
+    if(spMode==='sponsor'&&(!d.cost||d.cost<=0))return false;
+    if(spMode==='organic'&&d.cost>0)return false;
+    return true;
+  };
+
+  var aRows=raw.filter(function(d){return cmpA[d._period]&&baseFilter(d)});
+  var bRows=raw.filter(function(d){return cmpB[d._period]&&baseFilter(d)});
+  var aMerged=mergeRows(aRows);
+  var bMerged=mergeRows(bRows);
+
+  // セクション1：KPI比較
+  var aI=sm(aMerged,'impressions'),aC=sm(aMerged,'clicks'),aA=sm(aMerged,'applications'),aCost=sm(aMerged,'cost');
+  var bI=sm(bMerged,'impressions'),bC=sm(bMerged,'clicks'),bA=sm(bMerged,'applications'),bCost=sm(bMerged,'cost');
+  var aCtr=aI?aC/aI:0,bCtr=bI?bC/bI:0;
+  var aAr=aI?aA/aI:0,bAr=bI?bA/bI:0;
+  var aCpa=aA?aCost/aA:0,bCpa=bA?bCost/bA:0;
+
+  var aCom={};aMerged.forEach(function(d){if(d.company)aCom[d.company]=1});
+  var bCom={};bMerged.forEach(function(d){if(d.company)bCom[d.company]=1});
+  var aComN=Object.keys(aCom).length,bComN=Object.keys(bCom).length;
+
+  var noData=!aKeys.length||!bKeys.length;
+  if(noData){
+    document.getElementById('CMP_KPI').innerHTML='<div class="kc" style="grid-column:1/-1;text-align:center;color:var(--t2)">期間AとBをそれぞれ1つ以上選択してください</div>';
+    document.getElementById('CMP_TB').innerHTML='';
+    document.getElementById('CMP_TH').innerHTML='';
+    dx('cmpChart');
+    return;
+  }
+
+  function kpiCard(label,aVal,bVal,fmtFn,isPct,isCostDown){
+    var diff=bVal-aVal;
+    var pct=aVal?((diff/Math.abs(aVal))*100).toFixed(1):'—';
+    var col;
+    if(isCostDown){col=diff<0?'var(--s)':diff>0?'var(--d)':'var(--t2)';}
+    else{col=diff>0?'var(--s)':diff<0?'var(--d)':'var(--t2)';}
+    return'<div class="kc"><div class="kl">'+label+'</div>'+
+      '<div style="display:flex;justify-content:center;gap:16px;margin:4px 0;">'+
+      '<span style="color:#2557a7;font-weight:700;font-size:1rem;">A: '+fmtFn(aVal)+'</span>'+
+      '<span style="color:#ff6b35;font-weight:700;font-size:1rem;">B: '+fmtFn(bVal)+'</span></div>'+
+      '<div class="ks" style="color:'+col+';font-weight:700;">'+(diff>0?'+':'')+fmtFn(diff)+' ('+((diff>0?'+':'')+pct)+'%)</div></div>';
+  }
+
+  document.getElementById('CMP_KPI').innerHTML=
+    kpiCard('運用社数',aComN,bComN,fmt,false,false)+
+    kpiCard('求人数',aMerged.length,bMerged.length,fmt,false,false)+
+    kpiCard('合計表示',aI,bI,fmt,false,false)+
+    kpiCard('合計クリック',aC,bC,fmt,false,false)+
+    kpiCard('合計応募',aA,bA,fmt,false,false)+
+    kpiCard('全体CTR',aCtr,bCtr,fP,true,false)+
+    kpiCard('全体AR',aAr,bAr,fP,true,false)+
+    kpiCard('合計費用',aCost,bCost,fY,false,true)+
+    kpiCard('全体CPA',aCpa,bCpa,fY,false,true);
+
+  // セクション2：全期間折れ線＋ハイライト
+  var allPeriods={};raw.filter(baseFilter).forEach(function(d){
+    if(d._period&&d._period!=='unknown'){
+      if(!allPeriods[d._period])allPeriods[d._period]={key:d._period,rows:[]};
+      allPeriods[d._period].rows.push(d);
+    }
+  });
+  var pArr=Object.keys(allPeriods).sort();
+  var labels=[],vals=[],bgColors=[];
+  pArr.forEach(function(pk){
+    var parts=pk.split('_');var label=pk;
+    if(parts.length===2&&parts[0].length===8&&parts[1].length===8){
+      var s=parts[0],e=parts[1];
+      label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'');
+    }
+    labels.push(label);
+    vals.push(sm(allPeriods[pk].rows,'applications'));
+    if(cmpA[pk])bgColors.push('rgba(37,87,167,0.2)');
+    else if(cmpB[pk])bgColors.push('rgba(255,107,53,0.2)');
+    else bgColors.push('transparent');
+  });
+
+  dx('cmpChart');
+  if(pArr.length>=2){
+    ch.cmpChart=new Chart(document.getElementById('cCmp'),{
+      type:'bar',
+      data:{
+        labels:labels,
+        datasets:[
+          {type:'bar',label:'応募数',data:vals,backgroundColor:pArr.map(function(pk){return cmpA[pk]?'rgba(37,87,167,0.5)':cmpB[pk]?'rgba(255,107,53,0.5)':'rgba(107,114,128,0.3)'}),borderColor:pArr.map(function(pk){return cmpA[pk]?'#2557a7':cmpB[pk]?'#ff6b35':'#6b7280'}),borderWidth:2,order:2},
+          {type:'line',label:'推移',data:vals,borderColor:'#1e293b',backgroundColor:'transparent',tension:.3,pointRadius:8,pointBackgroundColor:pArr.map(function(pk){return cmpA[pk]?'#2557a7':cmpB[pk]?'#ff6b35':'#6b7280'}),pointBorderColor:'#fff',pointBorderWidth:2,order:1}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:14}}},datalabels:{display:false},tooltip:{titleFont:{size:14},bodyFont:{size:14}}},scales:{y:{beginAtZero:true,ticks:{font:{size:14}}},x:{ticks:{font:{size:14}}}}}
+    });
+   }
+
+  // セクション3：求人別差分テーブル
+  var aMap={};aMerged.forEach(function(d){aMap[d.refId||d.title]=d});
+  var bMap={};bMerged.forEach(function(d){bMap[d.refId||d.title]=d});
+  var allKeys={};Object.keys(aMap).forEach(function(k){allKeys[k]=1});Object.keys(bMap).forEach(function(k){allKeys[k]=1});
+
+  var rows=Object.keys(allKeys).map(function(k){
+    var a=aMap[k],b=bMap[k];
+    var ref=b||a;
+    var tag='';
+    if(!a)tag='新規';
+    else if(!b)tag='終了';
+    else{
+      var appD=(b.applications||0)-(a.applications||0);
+      tag=appD>0?'改善':appD<0?'悪化':'横ばい';
+    }
+    return{
+      title:ref.title||'',company:ref.company||'',url:ref.url||'',tag:tag,
+      aImp:a?a.impressions:0,bImp:b?b.impressions:0,
+      aClk:a?a.clicks:0,bClk:b?b.clicks:0,
+      aApp:a?a.applications:0,bApp:b?b.applications:0,
+      aCtr:a?a.ctr:0,bCtr:b?b.ctr:0,
+      aAr:a?a.ar:0,bAr:b?b.ar:0,
+      aCpa:a?a.cpa:0,bCpa:b?b.cpa:0,
+      aCost:a?a.cost:0,bCost:b?b.cost:0,
+      appDiff:(b?b.applications:0)-(a?a.applications:0),
+      ctrDiff:(b?b.ctr:0)-(a?a.ctr:0),
+      cpaDiff:(b?b.cpa:0)-(a?a.cpa:0)
+    };
+  });
+
+  // 検索
+  var q=(document.getElementById('CMP_Q').value||'').toLowerCase();
+  if(q)rows=rows.filter(function(r){return r.title.toLowerCase().indexOf(q)!==-1||r.company.toLowerCase().indexOf(q)!==-1});
+
+  // ソート
+  var sortVal=document.getElementById('CMP_SORT').value;
+  var sortKey=sortVal.split('_')[0],sortAsc=sortVal.split('_')[1]==='a';
+  rows.sort(function(a,b){return sortAsc?a[sortKey]-b[sortKey]:b[sortKey]-a[sortKey]});
+
+  var tagColor={新規:'#2557a7',終了:'#6b7280',改善:'#28a745',悪化:'#dc3545',横ばい:'#f59e0b'};
+
+  document.getElementById('CMP_TH').innerHTML='<th>求人</th><th>企業</th><th>状態</th><th>表示A→B</th><th>クリックA→B</th><th>応募A→B</th><th>CTR A→B</th><th>AR A→B</th><th>CPA A→B</th><th>費用A→B</th>';
+
+  document.getElementById('CMP_TB').innerHTML=rows.map(function(r){
+    var tagHtml='<span style="padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:600;color:#fff;background:'+(tagColor[r.tag]||'#999')+'">'+r.tag+'</span>';
+    var titleHtml=r.url?'<a href="'+r.url+'" target="_blank" style="color:var(--p)">'+sT(r.title,35)+'</a>':sT(r.title,35);
+    return'<tr>'+
+      '<td>'+titleHtml+'</td>'+
+      '<td>'+eN(r.company)+'</td>'+
+      '<td>'+tagHtml+'</td>'+
+      '<td class="tr">'+fmt(r.aImp)+' → '+fmt(r.bImp)+' '+cmpDiffHtml(r.aImp,r.bImp,false,false)+'</td>'+
+      '<td class="tr">'+fmt(r.aClk)+' → '+fmt(r.bClk)+' '+cmpDiffHtml(r.aClk,r.bClk,false,false)+'</td>'+
+      '<td class="tr">'+fmt(r.aApp)+' → '+fmt(r.bApp)+' '+cmpDiffHtml(r.aApp,r.bApp,false,false)+'</td>'+
+      '<td class="tr">'+fP(r.aCtr)+' → '+fP(r.bCtr)+' '+cmpDiffHtml(r.aCtr,r.bCtr,true,false)+'</td>'+
+      '<td class="tr">'+fP(r.aAr)+' → '+fP(r.bAr)+' '+cmpDiffHtml(r.aAr,r.bAr,true,false)+'</td>'+
+      '<td class="tr">'+(r.aCpa?fY(r.aCpa):'-')+' → '+(r.bCpa?fY(r.bCpa):'-')+' '+(r.aCpa||r.bCpa?cmpDiffHtml(r.aCpa,r.bCpa,false,true):'')+'</td>'+
+      '<td class="tr">'+fY(r.aCost)+' → '+fY(r.bCost)+' '+cmpDiffHtml(r.aCost,r.bCost,false,true)+'</td>'+
+      '</tr>';
+  }).join('')||'<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--t2)">データなし</td></tr>';
 }
 
 /* 起動 */

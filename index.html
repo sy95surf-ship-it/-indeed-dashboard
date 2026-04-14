@@ -1206,12 +1206,19 @@ function rCompare(){
 
   // フィルタ適用（企業等）
   var coAll=Object.keys(selCo).length===0;
+  var pr=document.getElementById('FP').value;
+  var st=document.getElementById('FS').value;
+  var kw=document.getElementById('FK').value.toLowerCase();
   var baseFilter=function(d){
     if(!coAll&&!selCo[d.company])return false;
+    if(pr&&d.prefecture!==pr)return false;
+    if(st&&d.status!==st)return false;
+    if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;
     if(spMode==='sponsor'&&(!d.cost||d.cost<=0))return false;
     if(spMode==='organic'&&d.cost>0)return false;
     return true;
   };
+
 
   var aRows=raw.filter(function(d){return cmpA[d._period]&&baseFilter(d)});
   var bRows=raw.filter(function(d){return cmpB[d._period]&&baseFilter(d)});

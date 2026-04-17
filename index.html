@@ -218,7 +218,6 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 <div class="cg">
 <div class="cd"><h3>表示回数TOP15</h3><div class="cc tl"><canvas id="c1"></canvas></div></div>
 <div class="cd"><h3>応募数TOP15</h3><div class="cc tl"><canvas id="c2"></canvas></div></div>
-<div class="cd fu"><h3>CTR vs 応募率バブル（サイズ=費用）</h3><div class="cc tl"><canvas id="c3"></canvas></div></div>
 </div>
 </div>
 
@@ -361,14 +360,13 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 </div>
 
 <script>
-var GAS_URL='https://script.google.com/macros/s/AKfycbyWyJgxUyZVFX5am4OqGlsmI1o0j5gg2H0UhcpAuT9vIVZseworMV1WwBk8KE5bjwVVgA/exec';
+var GAS_URL='https://script.google.com/macros/s/AKfycbw60kSsLXIg6d_iqwdJBBwuUYCs5k-ybpoOin7bAMmoeQMgxECXlE2u6L4umAp-JTFInQ/exec';
 var raw=[],flt=[],ch={},srt={c:null,a:true},pg=1,pfRank='ALL',selCo={};
 var PG=25;
-var KS=['title','campaign','country','prefecture','city','company','refId','createdAt','updatedAt','source','impressions','ctr','clicks','asr','appStarts','completionRate','applications','ar','cost','cpc','cpas','cpa','url','category','status'];
-var JH=['求人','キャンペーン','国','都道府県','市区町村','企業名','参照番号','作成日','最終更新日','掲載元サイト','表示回数','クリック率（CTR）','クリック数','応募開始率 (ASR)','応募開始数','応募完了率','応募数','応募率 (AR)','費用','クリック単価（CPC）','応募開始単価（CPAS）','応募単価（CPA）','求人URL','カテゴリー','求人のステータス'];
+var KS=['title','prefecture','city','company','refId','impressions','clicks','appStarts','applications','cost','url','status'];
+var JH=['求人','都道府県','市区町村','企業名','参照番号','表示回数','クリック数','応募開始数','応募数','費用','求人URL','求人のステータス'];
 var CM={};JH.forEach(function(h,i){CM[h]=KS[i]});
-CM['クリック率(CTR)']='ctr';CM['応募開始率(ASR)']='asr';CM['応募率(AR)']='ar';CM['クリック単価(CPC)']='cpc';CM['応募開始単価(CPAS)']='cpas';CM['応募単価(CPA)']='cpa';
-var NK=['impressions','clicks','appStarts','applications','cost','ctr','asr','completionRate','ar','cpc','cpas','cpa'];
+NK=['impressions','clicks','appStarts','applications','cost','ctr','asr','completionRate','ar','cpc','cpas','cpa'];
 var PCT=['ctr','asr','ar','completionRate'];
 var CL=['#2557a7','#ff6b35','#28a745','#dc3545','#ffc107','#6f42c1','#17a2b8','#fd7e14','#20c997','#e83e8c','#6c757d','#007bff','#00bcd4','#8bc34a','#9c27b0'];
 var RKC={S:'#d4a000',A:'#28a745',B:'#2557a7',C:'#d39e00',D:'#dc3545'};
@@ -472,9 +470,20 @@ function fetchGAS(){
         }
         for(var j=0;j<NK.length;j++){var nk=NK[j],v=String(o[nk]||'').replace(/,/g,'');var num=parseFloat(v)||0;if(PCT.indexOf(nk)!==-1&&num>1)num=num/100;o[nk]=num}
         if(!o._period)o._period='unknown';
+        if(!o._period)o._period='unknown';
+        o.ctr=o.impressions?o.clicks/o.impressions:0;
+        o.asr=o.clicks?o.appStarts/o.clicks:0;
+        o.completionRate=o.appStarts?o.applications/o.appStarts:0;
+        o.ar=o.clicks?o.applications/o.clicks:0;
+        o.cpc=o.clicks?o.cost/o.clicks:0;
+        o.cpas=o.appStarts?o.cost/o.appStarts:0;
+        o.cpa=o.applications?o.cost/o.applications:0;
         if(o.refId)out.push(o);
       }
-      raw=out;setStatus('ok','同期完了 '+raw.length+'件');resolve(true);
+      raw=out;setStatus('ok','同期完了 '+raw.length+'件');
+      // localStorageにキャッシュ保存
+      try{localStorage.setItem('dashCache',txt);localStorage.setItem('dashCacheTime',Date.now().toString())}catch(e){}
+      resolve(true);
     }).catch(function(e){setStatus('er','接続エラー');resolve(false)});
   });
 }
@@ -769,7 +778,7 @@ function applyF(){
       m.ctr=m.impressions?m.clicks/m.impressions:0;
       m.asr=m.clicks?m.appStarts/m.clicks:0;
       m.completionRate=m.appStarts?m.applications/m.appStarts:0;
-      m.ar=m.impressions?m.applications/m.impressions:0;
+      m.ar=m.clicks?m.applications/m.clicks:0;
       m.cpc=m.clicks?m.cost/m.clicks:0;
       m.cpas=m.appStarts?m.cost/m.appStarts:0;
       m.cpa=m.applications?m.cost/m.applications:0;
@@ -811,15 +820,27 @@ function renderAll(){rKPI();rOv();rRank();rFun();rCost();rComp();rReg();rTab();r
 
 function rKPI(){
   var d=flt,tI=sm(d,'impressions'),tC=sm(d,'clicks'),tAS=sm(d,'appStarts'),tA=sm(d,'applications'),tCo=sm(d,'cost');
+  var ctr=tI?tC/tI:0;
+  var asr=tC?tAS/tC:0;
+  var comp=tAS?tA/tAS:0;
+  var ar=tC?tA/tC:0;
+  var cpc=tC?tCo/tC:0;
+  var cpas=tAS?tCo/tAS:0;
+  var cpa=tA?tCo/tA:0;
   document.getElementById('KG').innerHTML=
     '<div class="kc"><div class="kl">求人数</div><div class="kv">'+d.length+'</div><div class="ks">募集中:'+d.filter(function(x){return x.status==='募集中'}).length+'</div></div>'+
     '<div class="kc"><div class="kl">合計表示</div><div class="kv">'+fmt(tI)+'</div></div>'+
+    '<div class="kc"><div class="kl">全体CTR</div><div class="kv">'+fP(ctr)+'</div></div>'+
     '<div class="kc"><div class="kl">合計クリック</div><div class="kv">'+fmt(tC)+'</div></div>'+
+    '<div class="kc"><div class="kl">全体ASR</div><div class="kv">'+fP(asr)+'</div></div>'+
+    '<div class="kc"><div class="kl">応募開始</div><div class="kv">'+fmt(tAS)+'</div></div>'+
+    '<div class="kc"><div class="kl">完了率</div><div class="kv">'+fP(comp)+'</div></div>'+
     '<div class="kc ac"><div class="kl">合計応募</div><div class="kv">'+fmt(tA)+'</div><div class="ks">開始:'+fmt(tAS)+'</div></div>'+
-    '<div class="kc"><div class="kl">全体CTR</div><div class="kv">'+fP(tI?tC/tI:0)+'</div></div>'+
-    '<div class="kc sc"><div class="kl">全体AR</div><div class="kv">'+fP(tI?tA/tI:0)+'</div></div>'+
+    '<div class="kc sc"><div class="kl">全体AR</div><div class="kv">'+fP(ar)+'</div></div>'+
     '<div class="kc"><div class="kl">合計費用</div><div class="kv">'+fY(tCo)+'</div></div>'+
-    '<div class="kc dc"><div class="kl">全体CPA</div><div class="kv">'+fY(tA?tCo/tA:0)+'</div><div class="ks">CPC:'+fY(tC?tCo/tC:0)+'</div></div>';
+    '<div class="kc"><div class="kl">全体CPC</div><div class="kv">'+fY(cpc)+'</div></div>'+
+    '<div class="kc"><div class="kl">全体CPAS</div><div class="kv">'+fY(cpas)+'</div></div>'+
+    '<div class="kc dc"><div class="kl">全体CPA</div><div class="kv">'+fY(cpa)+'</div><div class="ks">CPC:'+fY(cpc)+'</div></div>';
 }
 
 function hbar(id,key,data,lab,color){
@@ -831,8 +852,6 @@ function rOv(){
   byI.forEach(function(d){d._v=d.impressions});hbar('c1','imp',byI,'表示回数','#2557a7');
   var byA=flt.filter(function(d){return d.applications>0}).sort(function(a,b){return b.applications-a.applications}).slice(0,15);
   byA.forEach(function(d){d._v=d.applications});hbar('c2','apps',byA,'応募数','#ff6b35');
-  var mx=1;flt.forEach(function(d){if(d.cost>mx)mx=d.cost});
-  dx('bub');ch.bub=new Chart(document.getElementById('c3'),{type:'bubble',data:{datasets:flt.map(function(d,i){return{label:sT(d.title,20),data:[{x:d.ctr*100,y:d.ar*100,r:Math.max(3,(d.cost/mx)*40)}],backgroundColor:CL[i%CL.length]+'88',borderColor:CL[i%CL.length]}})},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false},tooltip:{callbacks:{label:function(ctx){var d=flt[ctx.datasetIndex];return sT(d.title,40)+' CTR:'+(d.ctr*100).toFixed(2)+'% AR:'+(d.ar*100).toFixed(2)+'% '+fY(d.cost)}}}},scales:{x:{title:{display:true,text:'CTR(%)'},beginAtZero:true},y:{title:{display:true,text:'AR(%)'},beginAtZero:true}}}});
 }
 
 var RMD={impressions_h:{k:'impressions',a:false,f:null},clicks_h:{k:'clicks',a:false,f:null},ctr_h:{k:'ctr',a:false,f:null},appStarts_h:{k:'appStarts',a:false,f:null},asr_h:{k:'asr',a:false,f:null},applications_h:{k:'applications',a:false,f:null},completionRate_h:{k:'completionRate',a:false,f:function(d){return d.appStarts>0}},ar_h:{k:'ar',a:false,f:null},cost_h:{k:'cost',a:false,f:null},cpc_l:{k:'cpc',a:true,f:function(d){return d.cpc>0}},cpas_l:{k:'cpas',a:true,f:function(d){return d.cpas>0}},cpa_l:{k:'cpa',a:true,f:function(d){return d.cpa>0}},cpc_h:{k:'cpc',a:false,f:function(d){return d.cpc>0}},cpas_h:{k:'cpas',a:false,f:function(d){return d.cpas>0}},cpa_h:{k:'cpa',a:false,f:function(d){return d.cpa>0}}};
@@ -1177,7 +1196,7 @@ function mergeRows(rows){
     m.ctr=m.impressions?m.clicks/m.impressions:0;
     m.asr=m.clicks?m.appStarts/m.clicks:0;
     m.completionRate=m.appStarts?m.applications/m.appStarts:0;
-    m.ar=m.impressions?m.applications/m.impressions:0;
+    m.ar=m.clicks?m.applications/m.clicks:0;
     m.cpc=m.clicks?m.cost/m.clicks:0;
     m.cpas=m.appStarts?m.cost/m.appStarts:0;
     m.cpa=m.applications?m.cost/m.applications:0;
@@ -1204,7 +1223,7 @@ function cmpDiffHtml(a,b,isPct,isCost){
 function rCompare(){
   var aKeys=Object.keys(cmpA),bKeys=Object.keys(cmpB);
 
-  // フィルタ適用（企業等）
+    // フィルタ適用（企業等）
   var coAll=Object.keys(selCo).length===0;
   var pr=document.getElementById('FP').value;
   var st=document.getElementById('FS').value;
@@ -1219,17 +1238,20 @@ function rCompare(){
     return true;
   };
 
-
   var aRows=raw.filter(function(d){return cmpA[d._period]&&baseFilter(d)});
   var bRows=raw.filter(function(d){return cmpB[d._period]&&baseFilter(d)});
   var aMerged=mergeRows(aRows);
   var bMerged=mergeRows(bRows);
 
-  // セクション1：KPI比較
-  var aI=sm(aMerged,'impressions'),aC=sm(aMerged,'clicks'),aA=sm(aMerged,'applications'),aCost=sm(aMerged,'cost');
-  var bI=sm(bMerged,'impressions'),bC=sm(bMerged,'clicks'),bA=sm(bMerged,'applications'),bCost=sm(bMerged,'cost');
+   // セクション1：KPI比較
+  var aI=sm(aMerged,'impressions'),aC=sm(aMerged,'clicks'),aAS=sm(aMerged,'appStarts'),aA=sm(aMerged,'applications'),aCost=sm(aMerged,'cost');
+  var bI=sm(bMerged,'impressions'),bC=sm(bMerged,'clicks'),bAS=sm(bMerged,'appStarts'),bA=sm(bMerged,'applications'),bCost=sm(bMerged,'cost');
   var aCtr=aI?aC/aI:0,bCtr=bI?bC/bI:0;
-  var aAr=aI?aA/aI:0,bAr=bI?bA/bI:0;
+  var aAsr=aC?aAS/aC:0,bAsr=bC?bAS/bC:0;
+  var aComp=aAS?aA/aAS:0,bComp=bAS?bA/bAS:0;
+  var aAr=aC?aA/aC:0,bAr=bC?bA/bC:0;
+  var aCpc=aC?aCost/aC:0,bCpc=bC?bCost/bC:0;
+  var aCpas=aAS?aCost/aAS:0,bCpas=bAS?bCost/bAS:0;
   var aCpa=aA?aCost/aA:0,bCpa=bA?bCost/bA:0;
 
   var aCom={};aMerged.forEach(function(d){if(d.company)aCom[d.company]=1});
@@ -1262,12 +1284,18 @@ function rCompare(){
     kpiCard('運用社数',aComN,bComN,fmt,false,false)+
     kpiCard('求人数',aMerged.length,bMerged.length,fmt,false,false)+
     kpiCard('合計表示',aI,bI,fmt,false,false)+
-    kpiCard('合計クリック',aC,bC,fmt,false,false)+
-    kpiCard('合計応募',aA,bA,fmt,false,false)+
     kpiCard('全体CTR',aCtr,bCtr,fP,true,false)+
+    kpiCard('合計クリック',aC,bC,fmt,false,false)+
+    kpiCard('全体ASR',aAsr,bAsr,fP,true,false)+
+    kpiCard('応募開始',aAS,bAS,fmt,false,false)+
+    kpiCard('完了率',aComp,bComp,fP,true,false)+
+    kpiCard('合計応募',aA,bA,fmt,false,false)+
     kpiCard('全体AR',aAr,bAr,fP,true,false)+
     kpiCard('合計費用',aCost,bCost,fY,false,true)+
+    kpiCard('全体CPC',aCpc,bCpc,fY,false,true)+
+    kpiCard('全体CPAS',aCpas,bCpas,fY,false,true)+
     kpiCard('全体CPA',aCpa,bCpa,fY,false,true);
+
 
   // セクション2：全期間折れ線＋ハイライト
   var allPeriods={};raw.filter(baseFilter).forEach(function(d){
@@ -1372,11 +1400,44 @@ document.querySelector('.tt[data-t="overview"]').classList.add('on');
 document.querySelector('.tt[data-t="performance"]').classList.remove('on');
 document.getElementById('p-overview').classList.add('on');
 document.getElementById('p-performance').classList.remove('on');
-showLoad('スプレッドシートからデータを取得中...');
+
+// キャッシュから即表示
+var cached=null;
+try{cached=localStorage.getItem('dashCache')}catch(e){}
+if(cached){
+  try{
+    var cData=JSON.parse(cached);
+    if(Array.isArray(cData)&&cData.length>=2){
+      var hd=cData[0],out=[];
+      for(var i=1;i<cData.length;i++){
+        var row=cData[i],o={};
+        for(var j=0;j<hd.length;j++){
+          var hk=String(hd[j]).trim();
+          if(hk==='_period'||hk==='_periodStart'||hk==='_periodEnd'){o[hk]=row[j]||'';continue}
+          var k=CM[hk]||KS[j]||hk;o[k]=row[j]!=null?row[j]:''
+        }
+        for(var j=0;j<NK.length;j++){var nk=NK[j],v=String(o[nk]||'').replace(/,/g,'');var num=parseFloat(v)||0;if(PCT.indexOf(nk)!==-1&&num>1)num=num/100;o[nk]=num}
+        if(!o._period)o._period='unknown';
+        if(o.refId)out.push(o);
+      }
+      raw=out;
+      init();loadStaff();
+      toast('キャッシュ表示',raw.length+'件（最新データ取得中...）');
+    }
+  }catch(e){cached=null;}
+}
+
+// GASから最新データを取得
+showLoad(cached?'最新データを確認中...':'スプレッドシートからデータを取得中...');
 fetchGAS().then(function(ok){
   hideLoad();
-  if(ok){init();loadStaff();if(raw.length)toast('読み込み完了',raw.length+'件のデータ')}
-  else{toast('接続エラー','GASのURLを確認してください',true);init()}
+  if(ok){
+    init();loadStaff();
+    toast('読み込み完了',raw.length+'件のデータ');
+  }else if(!cached){
+    toast('接続エラー','GASのURLを確認してください',true);
+    init();
+  }
 });
 </script>
 </body>

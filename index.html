@@ -360,16 +360,20 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 </div>
 
 <script>
-var GAS_URL='https://script.google.com/macros/s/AKfycbw60kSsLXIg6d_iqwdJBBwuUYCs5k-ybpoOin7bAMmoeQMgxECXlE2u6L4umAp-JTFInQ/exec';
+var GAS_URL='https://script.google.com/macros/s/AKfycbwAGnwGkg_RyzStEN77XBYh_TZB1XEvxICoy-PilZKKxkzbng6kC3olar6IdhaOzsazrg/exec';
 var raw=[],flt=[],ch={},srt={c:null,a:true},pg=1,pfRank='ALL',selCo={};
 var PG=25;
 var KS=['title','prefecture','city','company','refId','impressions','clicks','appStarts','applications','cost','url','status'];
 var JH=['求人','都道府県','市区町村','企業名','参照番号','表示回数','クリック数','応募開始数','応募数','費用','求人URL','求人のステータス'];
-var CM={};JH.forEach(function(h,i){CM[h]=KS[i]});
+var FULL_JH=['求人','キャンペーン','国','都道府県','市区町村','企業名','参照番号','作成日','最終更新日','掲載元サイト','表示回数','クリック率（CTR）','クリック数','応募開始率 (ASR)','応募開始数','応募完了率','応募数','応募率 (AR)','費用','クリック単価（CPC）','応募開始単価（CPAS）','応募単価（CPA）','求人URL','カテゴリー','求人のステータス'];
+var FULL_KS=['title','campaign','country','prefecture','city','company','refId','createdAt','updatedAt','source','impressions','ctr','clicks','asr','appStarts','completionRate','applications','ar','cost','cpc','cpas','cpa','url','category','status'];
+var CM={};FULL_JH.forEach(function(h,i){CM[h]=FULL_KS[i]});
+CM['クリック率(CTR)']='ctr';CM['応募開始率(ASR)']='asr';CM['応募率(AR)']='ar';CM['クリック単価(CPC)']='cpc';CM['応募開始単価(CPAS)']='cpas';CM['応募単価(CPA)']='cpa';
 NK=['impressions','clicks','appStarts','applications','cost','ctr','asr','completionRate','ar','cpc','cpas','cpa'];
 var PCT=['ctr','asr','ar','completionRate'];
 var CL=['#2557a7','#ff6b35','#28a745','#dc3545','#ffc107','#6f42c1','#17a2b8','#fd7e14','#20c997','#e83e8c','#6c757d','#007bff','#00bcd4','#8bc34a','#9c27b0'];
 var RKC={S:'#d4a000',A:'#28a745',B:'#2557a7',C:'#d39e00',D:'#dc3545'};
+
 
 function toast(t,m,e){var c=document.getElementById('TC'),el=document.createElement('div');el.className='to'+(e?' er':'');el.innerHTML='<b>'+t+'</b><span>'+m+'</span>';c.appendChild(el);setTimeout(function(){el.remove()},4500)}
 function showLoad(m){document.getElementById('LT').textContent=m||'読み込み中...';document.getElementById('LD').classList.add('on')}
@@ -490,9 +494,15 @@ function fetchGAS(){
 
 function sendGAS(rows){
   if(!GAS_URL||GAS_URL.indexOf('https://')!==0)return Promise.resolve(false);
-  var ks=KS.concat(['_period','_periodStart','_periodEnd']);
+  var FULL_KS=['title','campaign','country','prefecture','city','company','refId','createdAt','updatedAt','source','impressions','ctr','clicks','asr','appStarts','completionRate','applications','ar','cost','cpc','cpas','cpa','url','category','status','_period','_periodStart','_periodEnd'];
   var data=[];
-  for(var i=0;i<rows.length;i++){var r=rows[i],a=[];for(var j=0;j<ks.length;j++)a.push(r[ks[j]]!=null?r[ks[j]]:'');data.push(a)}
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i],a=[];
+    for(var j=0;j<FULL_KS.length;j++){
+      a.push(r[FULL_KS[j]]!=null?r[FULL_KS[j]]:'');
+    }
+    data.push(a);
+  }
   return fetch(GAS_URL,{method:'POST',body:JSON.stringify({rows:data})}).then(function(r){return r.text()}).then(function(){return true}).catch(function(e){toast('送信エラー',e.message,true);return false});
 }
 

@@ -335,7 +335,12 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 </div>
 <div class="kg" id="CMP_KPI"></div>
 <div class="cg">
-  <div class="cd fu"><h3>期間比較：全期間推移</h3><div class="cc tl"><canvas id="cCmp"></canvas></div></div>
+  <div class="cd fu">
+    <h3>期間比較：全期間推移</h3>
+    <div id="CMP_EX"></div>
+    <div class="cc tl"><canvas id="cCmp"></canvas></div>
+  </div>
+</div>
 </div>
 <div class="cg">
   <div class="cd fu">
@@ -1315,8 +1320,27 @@ function rCompare(){
     }
   });
   var pArr=Object.keys(allPeriods).sort();
-  var labels=[],vals=[],bgColors=[];
+
+  // 除外UI生成
+  if(!window.cmpExclude) window.cmpExclude={};
+  var exHtml='<div style="margin-bottom:8px;font-size:13px;color:var(--t2)">除外する期間：</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">';
   pArr.forEach(function(pk){
+    var parts=pk.split('_');var label=pk;
+    if(parts.length===2&&parts[0].length===8&&parts[1].length===8){
+      var s=parts[0],e=parts[1];
+      label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'');
+    }
+    var chk=window.cmpExclude[pk]?'checked':'';
+    exHtml+='<label style="font-size:12px;cursor:pointer;padding:2px 8px;border:1px solid #ddd;border-radius:4px;background:'+(window.cmpExclude[pk]?'#fee2e2':'#f9fafb')+'"><input type="checkbox" '+chk+' onchange="window.cmpExclude[\''+pk+'\']=this.checked;rCompare()" style="margin-right:4px;">'+label+'</label>';
+  });
+  exHtml+='</div>';
+  document.getElementById('CMP_EX').innerHTML=exHtml;
+
+  // 除外フィルタ適用
+  var filteredPArr=pArr.filter(function(pk){return !window.cmpExclude[pk]});
+
+  var labels=[],vals=[];
+  filteredPArr.forEach(function(pk){
     var parts=pk.split('_');var label=pk;
     if(parts.length===2&&parts[0].length===8&&parts[1].length===8){
       var s=parts[0],e=parts[1];
@@ -1324,25 +1348,22 @@ function rCompare(){
     }
     labels.push(label);
     vals.push(sm(allPeriods[pk].rows,'applications'));
-    if(cmpA[pk])bgColors.push('rgba(37,87,167,0.2)');
-    else if(cmpB[pk])bgColors.push('rgba(255,107,53,0.2)');
-    else bgColors.push('transparent');
   });
 
   dx('cmpChart');
-  if(pArr.length>=2){
+  if(filteredPArr.length>=2){
     ch.cmpChart=new Chart(document.getElementById('cCmp'),{
       type:'bar',
       data:{
         labels:labels,
         datasets:[
-          {type:'bar',label:'応募数',data:vals,backgroundColor:pArr.map(function(pk){return cmpA[pk]?'rgba(37,87,167,0.5)':cmpB[pk]?'rgba(255,107,53,0.5)':'rgba(107,114,128,0.3)'}),borderColor:pArr.map(function(pk){return cmpA[pk]?'#2557a7':cmpB[pk]?'#ff6b35':'#6b7280'}),borderWidth:2,order:2},
-          {type:'line',label:'推移',data:vals,borderColor:'#1e293b',backgroundColor:'transparent',tension:.3,pointRadius:8,pointBackgroundColor:pArr.map(function(pk){return cmpA[pk]?'#2557a7':cmpB[pk]?'#ff6b35':'#6b7280'}),pointBorderColor:'#fff',pointBorderWidth:2,order:1}
+          {type:'bar',label:'応募数',data:vals,backgroundColor:filteredPArr.map(function(pk){return cmpA[pk]?'rgba(37,87,167,0.5)':cmpB[pk]?'rgba(255,107,53,0.5)':'rgba(107,114,128,0.3)'}),borderColor:filteredPArr.map(function(pk){return cmpA[pk]?'#2557a7':cmpB[pk]?'#ff6b35':'#6b7280'}),borderWidth:2,order:2},
+          {type:'line',label:'推移',data:vals,borderColor:'#1e293b',backgroundColor:'transparent',tension:.3,pointRadius:8,pointBackgroundColor:filteredPArr.map(function(pk){return cmpA[pk]?'#2557a7':cmpB[pk]?'#ff6b35':'#6b7280'}),pointBorderColor:'#fff',pointBorderWidth:2,order:1}
         ]
       },
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:14}}},datalabels:{display:false},tooltip:{titleFont:{size:14},bodyFont:{size:14}}},scales:{y:{beginAtZero:true,ticks:{font:{size:14}}},x:{ticks:{font:{size:14}}}}}
     });
-   }
+  }
 
   // セクション3：求人別差分テーブル
   var aMap={};aMerged.forEach(function(d){aMap[d.refId||d.title]=d});

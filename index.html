@@ -364,7 +364,7 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 </div>
 
 <script>
-var GAS_URL='https://script.google.com/macros/s/AKfycbwAGnwGkg_RyzStEN77XBYh_TZB1XEvxICoy-PilZKKxkzbng6kC3olar6IdhaOzsazrg/exec';
+var GAS_URL='https://script.google.com/macros/s/AKfycbyb9E2smZfCsZ5F9Ks0ONdRVJ2ht3gO_5bB-FRIGEvBvoxKYjQZQExfRbUqpSxbjuHdhw/exec';
 var raw=[],flt=[],ch={},srt={c:null,a:true},pg=1,pfRank='ALL',selCo={};
 var PG=25;
 var KS=['title','prefecture','city','company','refId','impressions','clicks','appStarts','applications','cost','url','status'];
@@ -580,6 +580,7 @@ function loadStaff(){
     var d=JSON.parse(txt);
     if(d.success&&d.staff){
       window.companyEmoji=d.emojis||{};
+      window.staffStarts=d.starts||{};
       staffMap={};
       var html='<div class="mc-acts"><button id="STA">全選択</button><button id="STN">全解除</button></div><div id="STL">';
       d.staff.forEach(function(s){
@@ -592,13 +593,11 @@ function loadStaff(){
       document.getElementById('STN').onclick=function(e){e.stopPropagation();document.querySelectorAll('#STL input').forEach(function(cb){cb.checked=false});applyStaffFilter()};
       document.querySelectorAll('#STL input[type=checkbox]').forEach(function(cb){cb.onchange=applyStaffFilter});
       applyStaffFilter();
+      document.getElementById('STB').onclick=function(){document.getElementById('STD').classList.toggle('on')};
       buildCompanyFilter();
     }
   }).catch(function(){});
 }
-
-document.getElementById('STB').onclick=function(){document.getElementById('STD').classList.toggle('on')};
-document.addEventListener('click',function(e){if(!document.getElementById('STW').contains(e.target))document.getElementById('STD').classList.remove('on')});
 
 function applyStaffFilter(){
   var all=document.querySelectorAll('#STL input[type=checkbox]');
@@ -758,15 +757,57 @@ function applyF(){
   var coAll=Object.keys(selCo).length===0;
   var hasPeriods=Object.keys(selPeriods).length>0;
 
+  // 担当者フィルタの状態を取得
+  var allStaff=document.querySelectorAll('#STL input[type=checkbox]');
+  var checkedStaff=[];
+  allStaff.forEach(function(cb){if(cb.checked)checkedStaff.push(cb.value)});
+  var staffAll=checkedStaff.length===allStaff.length;
+  var starts=window.staffStarts||{};
+
   flt=raw.filter(function(d){
     if(!coAll&&!selCo[d.company])return false;
     if(pr&&d.prefecture!==pr)return false;
     if(st&&d.status!==st)return false;
     if(hasPeriods&&!selPeriods[d._period])return false;
-    if(!hasPeriods)return false; // 未選択なら何も表示しない
+    if(!hasPeriods)return false;
     if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;
     if(spMode==='sponsor'&&(!d.cost||d.cost<=0))return false;
     if(spMode==='organic'&&d.cost>0)return false;
+
+    // 担当者×期間の振り分け
+    if(!staffAll&&checkedStaff.length>0){
+      var periodKey=d._period||'';
+      var periodStart=periodKey.split('_')[0]||'';
+      var company=d.company||'';
+      var matched=false;
+      for(var s=0;s<checkedStaff.length;s++){
+        var name=checkedStaff[s];
+        var companies=staffMap[name]||[];
+        if(companies.indexOf(company)===-1)continue;
+        var startKey=starts[name+'_'+company]||'';
+        if(!startKey){
+          // 開始期間なし＝元々の担当者
+          // 他の担当者に開始期間があるか確認
+          var laterOwnerExists=false;
+          for(var t=0;t<allStaff.length;t++){
+            var otherName=allStaff[t].value;
+            if(otherName===name)continue;
+            var otherCompanies=staffMap[otherName]||[];
+            if(otherCompanies.indexOf(company)===-1)continue;
+            var otherStart=starts[otherName+'_'+company]||'';
+            if(otherStart&&periodStart>=otherStart){
+              laterOwnerExists=true;break;
+            }
+          }
+          if(!laterOwnerExists){matched=true;break;}
+        }else{
+          // 開始期間あり＝引継ぎ先の担当者
+          if(periodStart>=startKey){matched=true;break;}
+        }
+      }
+      if(!matched)return false;
+    }
+
     return true;
   });
 
@@ -803,6 +844,7 @@ function applyF(){
 
   calcRanks(flt);pg=1;pfRank='ALL';renderAll();
 }
+
 
 function init(){
   if(!raw.length){document.getElementById('UA').style.display='';document.getElementById('DB').style.display='none';document.getElementById('DS').classList.remove('on');return}
@@ -1237,11 +1279,19 @@ function cmpDiffHtml(a,b,isPct,isCost){
 function rCompare(){
   var aKeys=Object.keys(cmpA),bKeys=Object.keys(cmpB);
 
-    // フィルタ適用（企業等）
+  // フィルタ適用（企業等）
   var coAll=Object.keys(selCo).length===0;
   var pr=document.getElementById('FP').value;
   var st=document.getElementById('FS').value;
   var kw=document.getElementById('FK').value.toLowerCase();
+
+  // 担当者フィルタの状態を取得
+  var allStaff=document.querySelectorAll('#STL input[type=checkbox]');
+  var checkedStaff=[];
+  allStaff.forEach(function(cb){if(cb.checked)checkedStaff.push(cb.value)});
+  var staffAll=checkedStaff.length===allStaff.length;
+  var starts=window.staffStarts||{};
+
   var baseFilter=function(d){
     if(!coAll&&!selCo[d.company])return false;
     if(pr&&d.prefecture!==pr)return false;
@@ -1249,8 +1299,41 @@ function rCompare(){
     if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;
     if(spMode==='sponsor'&&(!d.cost||d.cost<=0))return false;
     if(spMode==='organic'&&d.cost>0)return false;
+
+    // 担当者×期間の振り分け
+    if(!staffAll&&checkedStaff.length>0){
+      var periodKey=d._period||'';
+      var periodStart=periodKey.split('_')[0]||'';
+      var company=d.company||'';
+      var matched=false;
+      for(var s=0;s<checkedStaff.length;s++){
+        var name=checkedStaff[s];
+        var companies=staffMap[name]||[];
+        if(companies.indexOf(company)===-1)continue;
+        var startKey=starts[name+'_'+company]||'';
+        if(!startKey){
+          var laterOwnerExists=false;
+          for(var t=0;t<allStaff.length;t++){
+            var otherName=allStaff[t].value;
+            if(otherName===name)continue;
+            var otherCompanies=staffMap[otherName]||[];
+            if(otherCompanies.indexOf(company)===-1)continue;
+            var otherStart=starts[otherName+'_'+company]||'';
+            if(otherStart&&periodStart>=otherStart){
+              laterOwnerExists=true;break;
+            }
+          }
+          if(!laterOwnerExists){matched=true;break;}
+        }else{
+          if(periodStart>=startKey){matched=true;break;}
+        }
+      }
+      if(!matched)return false;
+    }
+
     return true;
   };
+
 
   var aRows=raw.filter(function(d){return cmpA[d._period]&&baseFilter(d)});
   var bRows=raw.filter(function(d){return cmpB[d._period]&&baseFilter(d)});
@@ -1462,6 +1545,7 @@ showLoad(cached?'最新データを確認中...':'スプレッドシートから
 fetchGAS().then(function(ok){
   hideLoad();
   if(ok){
+    cmpBuilt=false;
     init();loadStaff();
     toast('読み込み完了',raw.length+'件のデータ');
   }else if(!cached){

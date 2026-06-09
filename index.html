@@ -1364,35 +1364,43 @@ function rCompare(){
     return;
   }
 
-  function kpiCard(label,aVal,bVal,fmtFn,isPct,isCostDown){
+  if(!window.cmpMetric) window.cmpMetric='applications';
+
+  function kpiCard(label,aVal,bVal,fmtFn,isPct,isCostDown,metricKey){
     var diff=bVal-aVal;
     var pct=aVal?((diff/Math.abs(aVal))*100).toFixed(1):'—';
     var col;
     if(isCostDown){col=diff<0?'var(--s)':diff>0?'var(--d)':'var(--t2)';}
     else{col=diff>0?'var(--s)':diff<0?'var(--d)':'var(--t2)';}
-    return'<div class="kc"><div class="kl">'+label+'</div>'+
+    var sel=window.cmpMetric===metricKey;
+    return'<div class="kc" data-metric="'+metricKey+'" style="cursor:pointer;outline:'+(sel?'3px solid #2557a7':'none')+';border-radius:var(--r);" onclick="window.cmpMetric=\''+metricKey+'\';rCompare();"><div class="kl">'+label+'</div>'+
       '<div style="display:flex;justify-content:center;gap:16px;margin:4px 0;">'+
       '<span style="color:#2557a7;font-weight:700;font-size:1rem;">A: '+fmtFn(aVal)+'</span>'+
       '<span style="color:#ff6b35;font-weight:700;font-size:1rem;">B: '+fmtFn(bVal)+'</span></div>'+
       '<div class="ks" style="color:'+col+';font-weight:700;">'+(diff>0?'+':'')+fmtFn(diff)+' ('+((diff>0?'+':'')+pct)+'%)</div></div>';
   }
 
-  document.getElementById('CMP_KPI').innerHTML=
-    kpiCard('運用社数',aComN,bComN,fmt,false,false)+
-    kpiCard('求人数',aMerged.length,bMerged.length,fmt,false,false)+
-    kpiCard('合計表示',aI,bI,fmt,false,false)+
-    kpiCard('全体CTR',aCtr,bCtr,fP,true,false)+
-    kpiCard('合計クリック',aC,bC,fmt,false,false)+
-    kpiCard('全体ASR',aAsr,bAsr,fP,true,false)+
-    kpiCard('応募開始',aAS,bAS,fmt,false,false)+
-    kpiCard('完了率',aComp,bComp,fP,true,false)+
-    kpiCard('合計応募',aA,bA,fmt,false,false)+
-    kpiCard('全体AR',aAr,bAr,fP,true,false)+
-    kpiCard('合計費用',aCost,bCost,fY,false,true)+
-    kpiCard('全体CPC',aCpc,bCpc,fY,false,true)+
-    kpiCard('全体CPAS',aCpas,bCpas,fY,false,true)+
-    kpiCard('全体CPA',aCpa,bCpa,fY,false,true);
+  var metricLabels={
+    companies:'運用社数',jobs:'求人数',impressions:'合計表示',ctr:'全体CTR',
+    clicks:'合計クリック',asr:'全体ASR',appStarts:'応募開始',completionRate:'完了率',
+    applications:'合計応募',ar:'全体AR',cost:'合計費用',cpc:'全体CPC',cpas:'全体CPAS',cpa:'全体CPA'
+  };
 
+  document.getElementById('CMP_KPI').innerHTML=
+    kpiCard('運用社数',aComN,bComN,fmt,false,false,'companies')+
+    kpiCard('求人数',aMerged.length,bMerged.length,fmt,false,false,'jobs')+
+    kpiCard('合計表示',aI,bI,fmt,false,false,'impressions')+
+    kpiCard('全体CTR',aCtr,bCtr,fP,true,false,'ctr')+
+    kpiCard('合計クリック',aC,bC,fmt,false,false,'clicks')+
+    kpiCard('全体ASR',aAsr,bAsr,fP,true,false,'asr')+
+    kpiCard('応募開始',aAS,bAS,fmt,false,false,'appStarts')+
+    kpiCard('完了率',aComp,bComp,fP,true,false,'completionRate')+
+    kpiCard('合計応募',aA,bA,fmt,false,false,'applications')+
+    kpiCard('全体AR',aAr,bAr,fP,true,false,'ar')+
+    kpiCard('合計費用',aCost,bCost,fY,false,true,'cost')+
+    kpiCard('全体CPC',aCpc,bCpc,fY,false,true,'cpc')+
+    kpiCard('全体CPAS',aCpas,bCpas,fY,false,true,'cpas')+
+    kpiCard('全体CPA',aCpa,bCpa,fY,false,true,'cpa');
 
   // セクション2：全期間折れ線＋ハイライト
   var allPeriods={};raw.filter(baseFilter).forEach(function(d){
@@ -1421,7 +1429,13 @@ function rCompare(){
   // 除外フィルタ適用
   var filteredPArr=pArr.filter(function(pk){return !window.cmpExclude[pk]});
 
+  // 選択指標に応じたデータ生成
+  var curMetric=window.cmpMetric||'applications';
+  var chartLabel=metricLabels[curMetric]||curMetric;
   var labels=[],vals=[];
+  var pctMetrics=['ctr','asr','completionRate','ar'];
+  var costMetrics=['cost','cpc','cpas','cpa'];
+
   filteredPArr.forEach(function(pk){
     var parts=pk.split('_');var label=pk;
     if(parts.length===2&&parts[0].length===8&&parts[1].length===8){
@@ -1429,21 +1443,48 @@ function rCompare(){
       label=s.substring(4,6).replace(/^0/,'')+'/'+s.substring(6,8).replace(/^0/,'')+' 〜 '+e.substring(4,6).replace(/^0/,'')+'/'+e.substring(6,8).replace(/^0/,'');
     }
     labels.push(label);
-    vals.push(sm(allPeriods[pk].rows,'applications'));
+
+    var rows=allPeriods[pk].rows;
+    var v=0;
+    if(curMetric==='companies'){
+      var cs={};rows.forEach(function(d){if(d.company)cs[d.company]=1});v=Object.keys(cs).length;
+    }else if(curMetric==='jobs'){
+      var js={};rows.forEach(function(d){js[d.refId||d.title]=1});v=Object.keys(js).length;
+    }else if(curMetric==='ctr'){
+      var ti=sm(rows,'impressions'),tc=sm(rows,'clicks');v=ti?tc/ti:0;
+    }else if(curMetric==='asr'){
+      var tc2=sm(rows,'clicks'),tas=sm(rows,'appStarts');v=tc2?tas/tc2:0;
+    }else if(curMetric==='completionRate'){
+      var tas2=sm(rows,'appStarts'),ta=sm(rows,'applications');v=tas2?ta/tas2:0;
+    }else if(curMetric==='ar'){
+      var tc3=sm(rows,'clicks'),ta2=sm(rows,'applications');v=tc3?ta2/tc3:0;
+    }else if(curMetric==='cpc'){
+      var tc4=sm(rows,'clicks'),tco=sm(rows,'cost');v=tc4?tco/tc4:0;
+    }else if(curMetric==='cpas'){
+      var tas3=sm(rows,'appStarts'),tco2=sm(rows,'cost');v=tas3?tco2/tas3:0;
+    }else if(curMetric==='cpa'){
+      var ta3=sm(rows,'applications'),tco3=sm(rows,'cost');v=ta3?tco3/ta3:0;
+    }else{
+      v=sm(rows,curMetric);
+    }
+    vals.push(v);
   });
 
   dx('cmpChart');
   if(filteredPArr.length>=2){
+    var yCallback=pctMetrics.indexOf(curMetric)!==-1?function(v){return (v*100).toFixed(1)+'%'}:costMetrics.indexOf(curMetric)!==-1?function(v){return '¥'+Math.round(v).toLocaleString()}:function(v){return v.toLocaleString()};
+    var tooltipCallback=yCallback;
+
     ch.cmpChart=new Chart(document.getElementById('cCmp'),{
       type:'bar',
       data:{
         labels:labels,
         datasets:[
-          {type:'bar',label:'応募数',data:vals,backgroundColor:filteredPArr.map(function(pk){return cmpA[pk]?'rgba(37,87,167,0.5)':cmpB[pk]?'rgba(255,107,53,0.5)':'rgba(107,114,128,0.3)'}),borderColor:filteredPArr.map(function(pk){return cmpA[pk]?'#2557a7':cmpB[pk]?'#ff6b35':'#6b7280'}),borderWidth:2,order:2},
+          {type:'bar',label:chartLabel,data:vals,backgroundColor:filteredPArr.map(function(pk){return cmpA[pk]?'rgba(37,87,167,0.5)':cmpB[pk]?'rgba(255,107,53,0.5)':'rgba(107,114,128,0.3)'}),borderColor:filteredPArr.map(function(pk){return cmpA[pk]?'#2557a7':cmpB[pk]?'#ff6b35':'#6b7280'}),borderWidth:2,order:2},
           {type:'line',label:'推移',data:vals,borderColor:'#1e293b',backgroundColor:'transparent',tension:.3,pointRadius:8,pointBackgroundColor:filteredPArr.map(function(pk){return cmpA[pk]?'#2557a7':cmpB[pk]?'#ff6b35':'#6b7280'}),pointBorderColor:'#fff',pointBorderWidth:2,order:1}
         ]
       },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:14}}},datalabels:{display:false},tooltip:{titleFont:{size:14},bodyFont:{size:14}}},scales:{y:{beginAtZero:true,ticks:{font:{size:14}}},x:{ticks:{font:{size:14}}}}}
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:14}}},datalabels:{display:false},tooltip:{titleFont:{size:14},bodyFont:{size:14},callbacks:{label:function(ctx){return chartLabel+': '+tooltipCallback(ctx.raw)}}}},scales:{y:{beginAtZero:true,ticks:{font:{size:14},callback:yCallback}},x:{ticks:{font:{size:14}}}}}
     });
   }
 

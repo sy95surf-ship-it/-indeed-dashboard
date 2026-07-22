@@ -184,7 +184,7 @@ if(sessionStorage.getItem('dashAuth')==='ok'){
 <div id="DB" style="display:none">
 <div class="fl" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
 <div class="fg" style="min-width:180px;"><label>企業名（複数選択可）</label><div class="mc-w" id="MCW"><div class="mc-btn" id="MCB">すべて <span>▼</span></div><div class="mc-dd" id="MCD"></div><div class="mc-tags" id="MCT"></div></div></div>
-<div class="fg" style="min-width:100px;max-width:140px;"><label>都道府県</label><select id="FP"><option value="">すべて</option></select></div>
+<div class="fg" style="min-width:100px;max-width:180px;"><label>都道府県</label><div class="mc-w" id="FPW"><div class="mc-btn" id="FPB">すべて <span>▼</span></div><div class="mc-dd" id="FPD"></div></div></div>
 <div class="fg" style="min-width:100px;max-width:140px;"><label>ステータス</label><select id="FS"><option value="">すべて</option><option value="募集中">募集中</option><option value="募集終了">募集終了</option></select></div>
 <div class="fg" style="min-width:240px;"><label>期間</label><div class="mc-w" id="PDW"><div class="mc-btn" id="PDB">最新 <span>▼</span></div><div class="mc-dd" id="PDD" style="min-width:280px;height:auto;max-height:400px;overflow-y:auto;resize:vertical;padding:8px;"></div></div></div>
 <div class="fg" style="min-width:140px;max-width:180px;"><label>担当者</label><div class="mc-w" id="STW"><div class="mc-btn" id="STB">すべて <span>▼</span></div><div class="mc-dd" id="STD"></div></div></div>
@@ -724,7 +724,7 @@ function updPeriodLabel(){
 }
 
 /* フィルタ共通 */
-['FP','FS'].forEach(function(id){document.getElementById(id).onchange=applyF});
+['FS'].forEach(function(id){document.getElementById(id).onchange=applyF});
 document.getElementById('FK').oninput=applyF;
 
 document.getElementById('FR').onclick=function(){
@@ -753,7 +753,7 @@ function setSP(mode){
 }
 
 function applyF(){
-  var pr=document.getElementById('FP').value,st=document.getElementById('FS').value,kw=document.getElementById('FK').value.toLowerCase();
+var prefAll=!window.selPref||Object.keys(window.selPref).length===0;var st=document.getElementById('FS').value,kw=document.getElementById('FK').value.toLowerCase();
   var coAll=Object.keys(selCo).length===0;
   var hasPeriods=Object.keys(selPeriods).length>0;
 
@@ -766,7 +766,7 @@ function applyF(){
 
   flt=raw.filter(function(d){
     if(!coAll&&!selCo[d.company])return false;
-    if(pr&&d.prefecture!==pr)return false;
+    if(!prefAll&&!window.selPref[d.prefecture])return false;
     if(st&&d.status!==st)return false;
     if(hasPeriods&&!selPeriods[d._period])return false;
     if(!hasPeriods)return false;
@@ -861,8 +861,46 @@ function init(){
 }
 
 function popFilt(){
-  var pr={};raw.forEach(function(d){pr[d.prefecture]=1});
-  document.getElementById('FP').innerHTML='<option value="">すべて</option>'+Object.keys(pr).sort().map(function(p){return'<option value="'+p+'">'+p+'</option>'}).join('');
+  var pr={};raw.forEach(function(d){if(d.prefecture)pr[d.prefecture]=1});
+  var prefs=Object.keys(pr).sort();
+  var html='<div class="mc-acts"><button id="FPA">全選択</button><button id="FPN">全解除</button></div><div id="FPL">';
+  prefs.forEach(function(p){
+    html+='<label><input type="checkbox" value="'+p+'" checked>'+p+'</label>';
+  });
+  html+='</div>';
+  document.getElementById('FPD').innerHTML=html;
+  document.getElementById('FPA').onclick=function(e){e.stopPropagation();document.querySelectorAll('#FPL input').forEach(function(cb){cb.checked=true});applyPrefFilter()};
+  document.getElementById('FPN').onclick=function(e){e.stopPropagation();document.querySelectorAll('#FPL input').forEach(function(cb){cb.checked=false});applyPrefFilter()};
+  document.querySelectorAll('#FPL input[type=checkbox]').forEach(function(cb){cb.onchange=applyPrefFilter});
+  document.getElementById('FPB').onclick=function(e){e.stopPropagation();document.getElementById('FPD').classList.toggle('on')};
+}
+if(!window._fpClickSet){
+  window._fpClickSet=true;
+  document.addEventListener('click',function(e){
+    var fpw=document.getElementById('FPW');
+    if(fpw&&!fpw.contains(e.target)){
+      var fpd=document.getElementById('FPD');
+      if(fpd)fpd.classList.remove('on');
+    }
+  });
+}
+
+function applyPrefFilter(){
+  var all=document.querySelectorAll('#FPL input[type=checkbox]');
+  var checked=[];
+  all.forEach(function(cb){if(cb.checked)checked.push(cb.value)});
+  var btn=document.getElementById('FPB');
+  var label=checked.length===all.length?'すべて':checked.length+'件選択中';
+  btn.textContent='';
+  btn.textContent=label+' ';
+  var span=document.createElement('span');
+  span.textContent='▼';
+  btn.appendChild(span);
+  window.selPref={};
+  if(checked.length<all.length){
+    checked.forEach(function(v){window.selPref[v]=1});
+  }
+  applyF();
 }
 
 document.querySelectorAll('.tt').forEach(function(t){t.onclick=function(){
@@ -1002,9 +1040,10 @@ function rTab(){
 
 var nfOpts=[
   {k:'cpa',l:'応募単価（CPA）',u:'円'},{k:'cpc',l:'クリック単価（CPC）',u:'円'},{k:'cost',l:'費用合計',u:'円'},
-  {k:'ctr',l:'CTR',u:'%'},{k:'asr',l:'応募率（ASR）',u:'%'},{k:'ar',l:'応募完了率（AR）',u:'%'},
+  {k:'ctr',l:'CTR',u:'%'},{k:'asr',l:'応募開始率（ASR）',u:'%'},{k:'completionRate',l:'応募完了率',u:'%'},{k:'ar',l:'応募率（AR）',u:'%'},
   {k:'impressions',l:'表示回数',u:'件'},{k:'clicks',l:'クリック数',u:'件'},{k:'apply_starts',l:'応募開始数',u:'件'},{k:'applications',l:'応募数',u:'件'}
 ];
+
 document.getElementById('NF').onclick=function(){
   var p=document.getElementById('NFP');
   p.style.display=p.style.display==='none'?'block':'none';
@@ -1036,10 +1075,10 @@ document.getElementById('PG').onclick=function(e){var b=e.target.closest('button
 /* 推移タブ */
 document.getElementById('TM').onchange=rTrend;
 function rTrend(){
-  var coAll=Object.keys(selCo).length===0;var pr=document.getElementById('FP').value;var st=document.getElementById('FS').value;var kw=document.getElementById('FK').value.toLowerCase();
+  var coAll=Object.keys(selCo).length===0;var prefAll=!window.selPref||Object.keys(window.selPref).length===0;var st=document.getElementById('FS').value;var kw=document.getElementById('FK').value.toLowerCase();
   var src=raw.filter(function(d){
     if(!coAll&&!selCo[d.company])return false;
-    if(pr&&d.prefecture!==pr)return false;
+    if(!prefAll&&!window.selPref[d.prefecture])return false;
     if(st&&d.status!==st)return false;
     if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;
     if(spMode==='sponsor'&&(!d.cost||d.cost<=0))return false;
@@ -1281,7 +1320,7 @@ function rCompare(){
 
   // フィルタ適用（企業等）
   var coAll=Object.keys(selCo).length===0;
-  var pr=document.getElementById('FP').value;
+  var prefAll=!window.selPref||Object.keys(window.selPref).length===0;
   var st=document.getElementById('FS').value;
   var kw=document.getElementById('FK').value.toLowerCase();
 
@@ -1294,7 +1333,7 @@ function rCompare(){
 
   var baseFilter=function(d){
     if(!coAll&&!selCo[d.company])return false;
-    if(pr&&d.prefecture!==pr)return false;
+    if(!prefAll&&!window.selPref[d.prefecture])return false;
     if(st&&d.status!==st)return false;
     if(kw&&(d.title||'').toLowerCase().indexOf(kw)===-1)return false;
     if(spMode==='sponsor'&&(!d.cost||d.cost<=0))return false;
